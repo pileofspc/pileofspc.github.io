@@ -33,6 +33,12 @@ p {
   user-select: none;
 }
 
+.run-result {
+  margin-left: 70px;
+  color: white;
+  text-shadow: 0 0 12px white;
+}
+
 .cursor {
   display: inline-block;
   width: 25px;

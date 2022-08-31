@@ -8,6 +8,7 @@ let cursor = document.querySelector(".cursor");
 let inputField = document.querySelector('.input-field');
 
 
+
 // Добавляем обработчики
 inputField.focus();
 window.onclick = function () {
@@ -15,15 +16,49 @@ window.onclick = function () {
 }
 
 inputField.oninput = function () {
-    // typedText.append(inputField.value);
-    typedText.textContent += inputField.value;
+    typedText.append(inputField.value);
+    // typedText.textContent += inputField.value;
     inputField.value = '';
 };
 
 
 
+// Массив последних введенных команд
+let lastEntered = [];
 
-// Функционал Backspace и CTRL + Backspace
+function lastEnteredPushMax10 () {
+    if (lastEntered.length < 10) {
+        lastEntered.push(typedText.textContent);
+    } else {
+        lastEntered.shift();
+        lastEntered.push(typedText.textContent);
+    }
+}
+
+
+// Достаем по очереди из массива последние введенные данные
+function getLastEntered () {
+    let lastIndex = lastEntered.length - 1;
+    let currentIndex = lastIndex - getLastEntered.functionCalledTimes;
+    if (getLastEntered.functionCalledTimes < lastEntered.length) {
+        getLastEntered.functionCalledTimes++;
+    }
+    return lastEntered[currentIndex];
+}
+getLastEntered.functionCalledTimes = 0;
+
+// В обратную сторону
+function getLastEnteredReverse () {
+    if (getLastEntered.functionCalledTimes-- > 0) {
+        getLastEntered.functionCalledTimes--;
+    }
+    
+    return getLastEntered();
+}
+
+
+
+// Функционал Backspace, CTRL + Backspace, Enter, ArrowUp
 
 let ctrlPressed = false;
 
@@ -32,11 +67,73 @@ window.onkeydown = function (evt) {
         ctrlPressed = true;
     }
 
-    if (ctrlPressed === true && evt.key == 'Backspace') {
+    if (evt.key == 'Backspace' && ctrlPressed === true) {
         typedText.textContent = '';
     }
+
     if (evt.key === 'Backspace') {
         typedText.textContent = typedText.textContent.slice(0, length - 1);
+    }
+    if (evt.key === 'ArrowUp') {
+        typedText.textContent = getLastEntered();
+    }
+    if (evt.key === 'ArrowDown') {
+        typedText.textContent = getLastEnteredReverse();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
+
+    if (evt.key === 'Enter') {
+        // Обнуляем счетчик функций последних введенных значений
+        getLastEntered.functionCalledTimes = 0;
+
+        // если строка начинается с 'run ', то выполняем команду и выдаем результат в качестве пишки с классом run-result, если нет, то просто продолжаем выполнение блока, т.е записываем просто текстом
+        if (typedText.textContent.slice(0, 4) === 'run ') {
+            let runResultText = String(
+                Function(typedText.textContent.slice(4))()
+            );
+            let runResult = document.createElement('p');
+
+            runResult.classList.add('run-result');
+            runResult.textContent = runResultText + '\n';
+            typedText.after(runResult);
+        }
+
+        //  если строка равна clear убираем все пишки
+        if (typedText.textContent === 'clear') {
+            let pTags = document.querySelectorAll('p');
+            for (let pTag of pTags) {
+                pTag.remove()
+            }
+        }
+        
+        
+        // Записываем последнее значение в массив, переходим на новую строку, убираем класс, добавляем новую p'шку, и присваиваем ее в переменную typedText
+        lastEnteredPushMax10();
+
+        typedText.textContent += '\n';
+        typedText.classList.remove('typed-text');
+
+        let newP = document.createElement('p');
+        newP.classList.add('typed-text');
+        cursor.before(newP);
+
+        typedText = newP;
     }
 };
 
@@ -110,15 +207,26 @@ function removeLineBreaks(string) {
 
 
 
-// Вывод рандомных цитат
-let quotes = [
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-];
+// Вывод рандомной цитаты
+
+// Рандомное число в диапазоне - взято с MDN https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //Максимум не включается, минимум включается
+  }
+
+function getQuote() {
+    let quotes = [
+        'Падение - это не провал. Провал это Провал. Падение - это где упал.',
+        'Не важно у кого день рождения. Важно у кого день рождения кого',
+        'Лучше один раз упасть, чем сто раз упасть',
+        'Каждый думает, что знает меня, но не каждый знает, что не знает, кто думает',
+        'Как бы сейчас не было сейчас. Все будет было.',
+        'Не слушай тех, кто много обещает. Они обычно много обещают',
+        'Волк слабее санитара, но в дурке он не работает',
+        'Никогда не поздно, никогда не рано - поменять все поздно, если это рано',
+    ];
+    let quote = quotes[getRandomInt(0, quotes.length)];
+    return quote;
+}
