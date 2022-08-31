@@ -40,7 +40,7 @@ function lastEnteredPushMax10 () {
 function getLastEntered () {
     let lastIndex = lastEntered.length - 1;
     let currentIndex = lastIndex - getLastEntered.functionCalledTimes;
-    if (getLastEntered.functionCalledTimes < lastEntered.length) {
+    if (getLastEntered.functionCalledTimes < lastEntered.length - 1) {
         getLastEntered.functionCalledTimes++;
     }
     return lastEntered[currentIndex];
@@ -99,9 +99,6 @@ window.onkeydown = function (evt) {
     // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
 
     if (evt.key === 'Enter') {
-        // Обнуляем счетчик функций последних введенных значений
-        getLastEntered.functionCalledTimes = 0;
-
         // если строка начинается с 'run ', то выполняем команду и выдаем результат в качестве пишки с классом run-result, если нет, то просто продолжаем выполнение блока, т.е записываем просто текстом
         if (typedText.textContent.slice(0, 4) === 'run ') {
             let runResultText = String(
@@ -127,13 +124,21 @@ window.onkeydown = function (evt) {
         lastEnteredPushMax10();
 
         typedText.textContent += '\n';
-        typedText.classList.remove('typed-text');
+        // typedText.classList.remove('typed-text');
+        typedText.removeAttribute('class');
 
         let newP = document.createElement('p');
         newP.classList.add('typed-text');
         cursor.before(newP);
 
         typedText = newP;
+
+
+
+        // Обнуляем счетчик функций последних введенных значений
+        getLastEntered.functionCalledTimes = 0;
+        // Переносимся в конец страницы
+        window.scroll(0, document.body.clientHeight);
     }
 };
 
@@ -142,6 +147,13 @@ window.onkeyup = function (evt) {
         ctrlPressed = false;
     }
 };
+
+
+
+
+
+
+
 
 
 
