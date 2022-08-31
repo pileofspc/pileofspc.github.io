@@ -118,6 +118,9 @@ window.onkeydown = function (evt) {
                 pTag.remove()
             }
         }
+        if (typedText.textContent === 'exit' || typedText.textContent === 'quit') {
+            window.location.href = 'https://pileofspc.github.io/';
+        }
         
         
         // Записываем последнее значение в массив, переходим на новую строку, убираем класс, добавляем новую p'шку, и присваиваем ее в переменную typedText
@@ -166,7 +169,6 @@ const delayHidden = 400;
 // Показать курсор + создать таймаут на след. функцию
 function  cursorFlickerShow () {
     cursor.style.opacity = '100%';
-    // console.log('100%');
 
     cursorFlickerShow.timerId = setTimeout(cursorFlickerHide, delayVisible);
     return
@@ -175,7 +177,6 @@ function  cursorFlickerShow () {
 // Скрыть курсор + создать таймаут на след. функцию
 function cursorFlickerHide () {
     cursor.style.opacity = '0';
-    // console.log('0%');
 
     cursorFlickerHide.timerId = setTimeout(cursorFlickerShow, delayHidden);
     return
