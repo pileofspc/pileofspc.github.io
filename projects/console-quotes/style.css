@@ -2,9 +2,9 @@
 @font-face {
   font-family: "Undertale";
   src: local("Undertale Battle Font"),
-  url(fonts/fontsquirrel/undertale-battle-font.woff2) format("woff"),
-  url(fonts/fontsquirrel/undertale-battle-font.woff) format("woff"),
-  url(fonts/Undertale-Battle-Font.ttf) format("truetype");
+  url(fonts/fontsquirrel/undertale-battle-font.woff2) format("font/woff2"),
+  url(fonts/fontsquirrel/undertale-battle-font.woff) format("font/woff"),
+  url(fonts/Undertale-Battle-Font.ttf) format("font/ttf");
 }
 
 html {
