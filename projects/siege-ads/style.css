@@ -13,9 +13,6 @@ body {
   color: #dedede;
 }
 
-
-
-
 .page-header {
   font-family:'Courier New', Courier, monospace;
   font-size: 1.2rem;
@@ -23,7 +20,6 @@ body {
   border-bottom: 2px solid #dedede;
   padding: 0;
   padding-bottom: 0.8vw;
-  margin-bottom: 20px;
 }
 
 .header-flex {
@@ -100,14 +96,10 @@ body {
   text-shadow: 0 0 10px #26c4c9;
 }
 
-
-
-a {
-  color: inherit;
-  text-decoration: none;
+p {
+  margin: 0;
 }
 
-a:hover {
-  color: #26c4c9;
-  text-shadow: 0 0 10px #26c4c9;
+.inline {
+  display: inline;
 }

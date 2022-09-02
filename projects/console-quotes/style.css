@@ -1,0 +1,78 @@
+/* Подключаю шрифт */
+@font-face {
+  font-family: "Undertale";
+  src: local("Undertale Battle Font"),
+  url(fonts/fontsquirrel/undertale-battle-font.woff2) format("woff"),
+  url(fonts/fontsquirrel/undertale-battle-font.woff) format("woff"),
+  url(fonts/Undertale-Battle-Font.ttf) format("truetype");
+}
+
+html {
+  font-size: 56px;
+
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+html::-webkit-scrollbar {
+  display: none; /* Chrome */
+}
+
+
+
+body {
+  background-color: black;
+
+  font-family:  "Undertale", "Cambria", sans-serif;
+  font-weight: 400;
+  color: cyan;
+  text-shadow: 0 0 12px cyan;
+  
+  padding-left: 1%;
+  padding-right: 1%;
+}
+
+p {
+  display: inline;
+  margin-right: 0;
+
+  white-space: pre-wrap;
+  word-wrap: break-word;
+
+  user-select: none;
+}
+
+.command-result {
+  margin-left: 70px;
+  color: white;
+  text-shadow: 0 0 12px white;
+}
+
+.cursor {
+  display: inline-block;
+  width: 25px;
+  height: 40px;
+  margin-left: 5px;
+
+  background-color: cyan;
+  box-shadow: 0 0 12px 0 cyan;
+
+  transition: opacity 0.1s;
+}
+
+input[type = "text"] {
+  position: absolute;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+
+  width: 0px;
+
+  caret-color: transparent;
+  background-color: transparent;
+  border: none;
+}
+
+input[type = "text"]:focus,
+input[type = "text"]:active {
+  outline: none;
+}

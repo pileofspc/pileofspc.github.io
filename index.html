@@ -2,13 +2,32 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8">
-    <title>Консоль + цитаты</title>
+    <title>pileofspc</title>
     <link href="style.css" rel="stylesheet">
-    <link rel="icon" href="images/thumbnail.jpg" type="image/jpeg">
+    <!-- <link href="outlines.css" rel="stylesheet"> -->
+    <link rel="icon" href="favicon/thumbnail_48_48.png" type="image/png">
   </head>
   <body>
-    <p class = "typed-text"></p><span class = "cursor"></span>
-    <input type="text" class="input-field">
+    <header class="page-header">
+      <div class="header-flex">
+        <a class="person" href="https://github.com/pileofspc/" target="_blank" rel="noreferrer noopener"> <!-- Наверное не нужен rel="noreferrer noopener", но на всякий случай добавил -->
+            <img class="avatar" src="images/avatar.jpg">
+            <span class="nickname">pileofspc</span>
+        </a>
+        <nav class="header-nav">
+          <ul class="nav-list">
+            <li class="nav-item"><a href="https://pileofspc.github.io">На главную</a></li>
+            <li class="nav-item"><a href="#project-1">Мои проекты</a></li>
+            <li class="nav-item"><a href="#">Обо мне</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <article class="project" id="project-1">
+        <a href="/projects/console-quotes/">Консоль и печать цитат</a>
+      </article>
+    </main>
     <script src="script.js"></script>
   </body>
 </html>
