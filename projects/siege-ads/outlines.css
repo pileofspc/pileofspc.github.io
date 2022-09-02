@@ -1,0 +1,7 @@
+*:not(html):not(body) {
+  outline: 1px solid white;
+}
+
+div {
+  outline: 1px red;
+}
