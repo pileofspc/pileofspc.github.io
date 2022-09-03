@@ -1,8 +1,10 @@
-// "use strict"
+"use strict"
 
-
-// Нахуй сломано renderCommandResult - сломалось, когда вывел это дело в отдельную функцию
-// run String( Function(typedText.textContent.slice(4)) () ); приводит к переполнению стека
+// ? - вроде исправил ввод больших букв с телефона
+// v - добавил команду help
+// v - переделал функционал последних введенных значений с функций на объект с методами 
+// v - иногда курсор уходит на след строку, если предыдущая строка полностью заполнена и кажется что началась другая команда
+// немного трясет экран при вводе первой буквы из-за строки 27 и 302
 
 
 
@@ -23,45 +25,47 @@ window.onclick = function () {
 }
 
 inputField.oninput = function () {
-    typedText.append(inputField.value);
-    // typedText.textContent += inputField.value;
-    inputField.value = '';
+    typedText.textContent = inputField.value;
+    window.scroll(0, document.body.clientHeight);
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Массив последних введенных команд
-let lastEntered = [];
+// Объект последних введенных команд
+let lastEntered = {
+    array: [],
+    position: -1,
+    pushMax10: function () {
+        if (this.array.length < 10) {
+            this.array.push(typedText.textContent);
+        } else {
+            this.array.shift();
+            this.array.push(typedText.textContent);
+        }
+        return
+    },
+    get: function () {
+        let lastIndex = this.array.length - 1;
+        let currentIndex = lastIndex - this.position;
+        return this.array[currentIndex];
+    },
 
-function lastEnteredPushMax10 () {
-    if (lastEntered.length < 10) {
-        lastEntered.push(typedText.textContent);
-    } else {
-        lastEntered.shift();
-        lastEntered.push(typedText.textContent);
+    setPrevious: function () {
+        if (this.position < this.array.length - 1) this.position++
+    },
+    setNext: function () {
+        if (this.position > -1) this.position--
+    },
+
+    getSetPrevious: function () {
+        this.setPrevious();
+        return this.get();
+    },
+    getSetNext: function () { 
+        this.setNext();
+        return this.get();
     }
-}
-
-
-// Достаем по очереди из массива последние введенные данные
-function getLastEntered () {
-    let lastIndex = lastEntered.length - 1;
-    let currentIndex = lastIndex - getLastEntered.functionCalledTimes;
-    if (getLastEntered.functionCalledTimes < lastEntered.length - 1) {
-        getLastEntered.functionCalledTimes++;
-    }
-    return lastEntered[currentIndex];
-}
-getLastEntered.functionCalledTimes = 0;
-
-// В обратную сторону
-function getLastEnteredReverse () {
-    if (getLastEntered.functionCalledTimes-- > 0) {
-        getLastEntered.functionCalledTimes--;
-    }
-    
-    return getLastEntered();
-}
+};
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,8 +78,9 @@ function renderCommandResult(text) {
     let commandResult = document.createElement('p');
 
     commandResult.classList.add('command-result');
-    commandResult.textContent = commandResultText + '\n';
+    commandResult.textContent = commandResultText;
     typedText.after(commandResult);
+    commandResult.after(document.createElement('br'));
     return
 }
 
@@ -86,17 +91,18 @@ window.onkeydown = function (evt) {
 
     if (evt.key == 'Backspace' && ctrlPressed === true) {
         typedText.textContent = '';
-    }
-
-    if (evt.key === 'Backspace') {
-        typedText.textContent = typedText.textContent.slice(0, length - 1);
+        inputField.value = typedText.textContent;
     }
 
     if (evt.key === 'ArrowUp') {
-        typedText.textContent = getLastEntered();
+        evt.preventDefault();                                        //evt.preventDefault(); здесь нужен, т.к при нажатии ArrowUp по умолчанию каретка в input уходит в начало, что нам не нужно
+        typedText.textContent = lastEntered.getSetPrevious();
+        inputField.value = typedText.textContent;
     }
     if (evt.key === 'ArrowDown') {
-        typedText.textContent = getLastEnteredReverse();
+        evt.preventDefault();
+        typedText.textContent = lastEntered.getSetNext();
+        inputField.value = typedText.textContent;
     }
 
     // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
@@ -104,6 +110,21 @@ window.onkeydown = function (evt) {
     // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
 
     if (evt.key === 'Enter') {
+        if (typedText.textContent === 'help') {
+            renderCommandResult(
+                'run (js command) - выполнить любую команду JavaScript и вывести результат в качестве строки\n' +
+                'quote - показать случайную цитату\n' +
+                'type - напечатать случайную цитату в поле ввода\n' +
+                'clear - очистить консоль\n' +
+                'quit - вернуться на главную страницу\n' +
+                'exit - вернуться на главную страницу'
+                );
+        }
+
+        if (typedText.textContent === 'type') {
+            typeQuote();
+        }
+
         // если строка начинается с 'run ', то выполняем команду и выдаем результат в качестве пишки с классом run-result, если нет, то просто продолжаем выполнение блока, т.е записываем просто текстом
         if (typedText.textContent.slice(0, 4) === 'run ') {
             let command = String(Function('return ' + typedText.textContent.slice(4))());
@@ -120,6 +141,7 @@ window.onkeydown = function (evt) {
 
         // если набрали exit или quit - переходим на главную страницу
         if (typedText.textContent === 'exit' || typedText.textContent === 'quit') {
+
             // window.location.href = 'https://pileofspc.github.io/';
             window.open('https://pileofspc.github.io/', '_self', "noreferrer, noopener")
         }
@@ -129,7 +151,7 @@ window.onkeydown = function (evt) {
         
         
         // Записываем последнее значение в массив, переходим на новую строку, убираем класс, добавляем новую p'шку, и присваиваем ее в переменную typedText
-        lastEnteredPushMax10();
+        lastEntered.pushMax10();
 
         typedText.textContent += '\n';
         if (typedText.className === 'typed-text') {
@@ -144,8 +166,10 @@ window.onkeydown = function (evt) {
 
         typedText = newP;
 
-        // Обнуляем счетчик функций последних введенных значений
-        getLastEntered.functionCalledTimes = 0;
+        inputField.value = '';
+
+        // Обнуляем позицию счетчика последних введенных значений
+        lastEntered.position = -1;
         // Переносимся в конец страницы
         window.scroll(0, document.body.clientHeight);
     }
@@ -269,23 +293,30 @@ let letter = new Letter();
 // выполнить метод, чтобы он обновил весь объект и отдача букв пошла заново
 
 function typeQuote() {
-    let func = function () {
-        typedText.textContent += letter.getSetNext()
-        let timerId = setTimeout(func, 50);
+    let listenerArray = [window.onkeydown]                      // в старой версии было несколько значений. пока оставил как массив
+    window.onkeydown = null;
+    inputField.setAttribute('readonly', '');
+    ctrlPressed = false;
+
+
+    function triggerInputEvent(){
+        inputField.dispatchEvent(
+            new Event('input', {bubbles:true})
+            );
+    }
+
+    function type() {
+        inputField.value += letter.getSetNext()
+        triggerInputEvent();
+
+        let timerId = setTimeout(type, 50);
         if (letter.done) {
             clearTimeout(timerId);
             window.onkeydown = listenerArray[0];
-            inputField.oninput = listenerArray[1];
+            inputField.removeAttribute('readonly');
         }
     };
-    setTimeout(func, 300);
-
-    let listenerArray = [window.onkeydown, inputField.oninput]
-    window.onkeydown = null;
-    inputField.oninput = function () {
-        inputField.value = '';
-    };
-    ctrlPressed = false;
+    setTimeout(type, 300);
     return 'quote'
 };
 typeQuote();
