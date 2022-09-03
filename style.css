@@ -1,27 +1,7 @@
 @font-face {
-  font-family: "Courier Nw";
-  src: url("fonts/Courier New/courier-new.ttf") format(truetype);
-  /* font-weight: normal;
-  font-style: normal; */
-}
- /* @font-face {
   font-family: "Courier New";
-  src: url("fonts/Courier New/courier-new-bold.ttf") format(truetype);
-  font-weight: bold;
-  font-style: normal;
+  src: url("fonts/Courier New/courier-new.ttf") format("truetype");
 }
-@font-face {
-  font-family: "Courier New";
-  src: url("fonts/Courier New/courier-new-italic.ttf") format(truetype);
-  font-weight: normal;
-  font-style: italic;
-}
-@font-face {
-  font-family: "Courier Ne";
-  src: url("fonts/Courier New/courier-new-italic.ttf") format(truetype);
-  font-weight: bold;
-  font-style: italic;
-} */
 
 html {
   font-size: 20px;
@@ -33,17 +13,13 @@ body {
 
   background-color: #121212;
   
-  font-family: "Courier Nw";
+  font-family: "Courier New", monospace;
   font-size: 1rem;
-  /* font-style: italic;
-  font-weight: bold; */
-
 
   color: #dedede;
 }
 
 .page-header {
-  /* font-family:'Courier New', monospace; */
   font-size: 1.2rem;
 
   border-bottom: 2px solid #dedede;
@@ -78,10 +54,6 @@ body {
 
 .person:hover .avatar {
   box-shadow: 0 0 10px 0 rgb(75, 75, 75);
-}
-
-.person {
-  transform: translateX(470px);
 }
 
 .avatar {
