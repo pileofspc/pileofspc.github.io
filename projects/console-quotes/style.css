@@ -38,8 +38,6 @@ p {
   word-wrap: break-word;
 
   user-select: none;
-
-  outline: 1px solid white;
 }
 
 .command-result {
