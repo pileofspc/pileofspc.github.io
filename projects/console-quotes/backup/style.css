@@ -13,10 +13,11 @@ html {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-
 html::-webkit-scrollbar {
   display: none; /* Chrome */
 }
+
+
 
 body {
   background-color: black;
@@ -26,41 +27,34 @@ body {
   color: cyan;
   text-shadow: 0 0 12px cyan;
   
-  padding-left: 10px;
-  padding-right: 25px;
+  padding-left: 1%;
+  padding-right: 1%;
 }
 
 p {
   display: inline;
-  margin: 0;
+  margin-right: 0;
 
   white-space: pre-wrap;
   word-wrap: break-word;
-  user-select: none;
 
-  outline: 1px solid white;
+  user-select: none;
 }
 
 .command-result {
-  display: inline-block;
   margin-left: 70px;
-
   color: white;
   text-shadow: 0 0 12px white;
 }
 
 .cursor {
   display: inline-block;
-  position: absolute;
   width: 25px;
   height: 40px;
   margin-left: 5px;
-  margin-top: 13px;
 
   background-color: cyan;
-  filter: drop-shadow(0 0 12px cyan);
-  padding-bottom: 20px;
-  background-clip: content-box;
+  box-shadow: 0 0 12px 0 cyan;
 
   transition: opacity 0.1s;
 }
@@ -72,7 +66,10 @@ input[type = "text"] {
   padding: 0;
 
   width: 0px;
-  opacity: 0;
+
+  caret-color: transparent;
+  background-color: transparent;
+  border: none;
 }
 
 input[type = "text"]:focus,

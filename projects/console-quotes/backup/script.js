@@ -1,47 +1,14 @@
-"use strict"
-
-// v - вроде исправил ввод больших букв с телефона
-// v - добавил команду help
-// v - переделал функционал последних введенных значений с функций на объект с методами 
-// v - иногда курсор уходит на след строку, если предыдущая строка полностью заполнена и кажется что началась другая команда
-// v - неправильно отображается что-то с телефона, забыл что конкретно (((
-// v - немного трясет экран при вводе первой буквы из-за строки 27 и 302 {исправил в css}
-// v - Неправильные шрифты на телефоне на главной странице
-
-// ? - Если выведена цитата, то на телефоне после ввода второй буквы пропадает весь введенный текст
-// ? - autocomplete вообще напрочь все ломает
-// ? - При первой загрузке с телефона ссылки анимируются на главной странице
-// ? - надо запретить перемещать каретку или сделать нормальный функционал для этого
-
-// сделать функционал для каретки
+// "use strict"
 
 
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+// Нахуй сломано renderCommandResult - сломалось, когда вывел это дело в отдельную функцию
+// run String( Function(typedText.textContent.slice(4)) () ); приводит к переполнению стека
 
 
-// Дурацкая функция для того, чтобы убрать пробелы и переносы строки из HTML кода
-function removeLineBreaks(string) {
-    let stringArray = Array.from(string);
-
-    let bracketCount = 0;
-    stringArray.forEach(function (item, index, array) {
-        if (item === '<') { ++bracketCount };
-        if (item === '>') { --bracketCount };
-
-        if (bracketCount === 0 && (item === '\n' || item === ' ')) {
-            array[index] = '';
-        };
-    });
-    let result = stringArray.join('');
-    return result
-};
 
 // Ищем элементы
 let typedText = document.querySelector('.typed-text');
-typedText.innerHTML = removeLineBreaks(typedText.innerHTML);    // innerHTML меняет элементы внутри себя, поэтому все querySelector'ы, прописанные внутри данного элемента становятся недействительными((((
+typedText.innerHTML = removeLineBreaks(typedText.innerHTML);    // Эта команда меняет элементы внутри себя, поэтому все querySelector'ы, прописанные внутри данного элемента становятся недействительными((((
 
 let cursor = document.querySelector(".cursor");
 let inputField = document.querySelector('.input-field');
@@ -49,55 +16,52 @@ let inputField = document.querySelector('.input-field');
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Добавляем обработчики и передаем фокус на элемент ввода
+// Добавляем обработчики
 inputField.focus();
 window.onclick = function () {
     inputField.focus();
 }
 
 inputField.oninput = function () {
-    inputField.selectionStart = inputField.value.length;
-    typedText.textContent = inputField.value;
-    window.scroll(0, document.body.clientHeight);
+    typedText.append(inputField.value);
+    // typedText.textContent += inputField.value;
+    inputField.value = '';
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Объект последних введенных команд
-let lastEntered = {
-    array: [],
-    position: -1,
-    pushMax10: function () {
-        if (this.array.length < 10) {
-            this.array.push(typedText.textContent);
-        } else {
-            this.array.shift();
-            this.array.push(typedText.textContent);
-        }
-        return
-    },
-    get: function () {
-        let lastIndex = this.array.length - 1;
-        let currentIndex = lastIndex - this.position;
-        return this.array[currentIndex];
-    },
+// Массив последних введенных команд
+let lastEntered = [];
 
-    setPrevious: function () {
-        if (this.position < this.array.length - 1) this.position++
-    },
-    setNext: function () {
-        if (this.position > -1) this.position--
-    },
-
-    getSetPrevious: function () {
-        this.setPrevious();
-        return this.get();
-    },
-    getSetNext: function () { 
-        this.setNext();
-        return this.get();
+function lastEnteredPushMax10 () {
+    if (lastEntered.length < 10) {
+        lastEntered.push(typedText.textContent);
+    } else {
+        lastEntered.shift();
+        lastEntered.push(typedText.textContent);
     }
-};
+}
+
+
+// Достаем по очереди из массива последние введенные данные
+function getLastEntered () {
+    let lastIndex = lastEntered.length - 1;
+    let currentIndex = lastIndex - getLastEntered.functionCalledTimes;
+    if (getLastEntered.functionCalledTimes < lastEntered.length - 1) {
+        getLastEntered.functionCalledTimes++;
+    }
+    return lastEntered[currentIndex];
+}
+getLastEntered.functionCalledTimes = 0;
+
+// В обратную сторону
+function getLastEnteredReverse () {
+    if (getLastEntered.functionCalledTimes-- > 0) {
+        getLastEntered.functionCalledTimes--;
+    }
+    
+    return getLastEntered();
+}
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,9 +74,8 @@ function renderCommandResult(text) {
     let commandResult = document.createElement('p');
 
     commandResult.classList.add('command-result');
-    commandResult.textContent = commandResultText;
+    commandResult.textContent = commandResultText + '\n';
     typedText.after(commandResult);
-    commandResult.after(document.createElement('br'));
     return
 }
 
@@ -123,18 +86,17 @@ window.onkeydown = function (evt) {
 
     if (evt.key == 'Backspace' && ctrlPressed === true) {
         typedText.textContent = '';
-        inputField.value = typedText.textContent;
+    }
+
+    if (evt.key === 'Backspace') {
+        typedText.textContent = typedText.textContent.slice(0, length - 1);
     }
 
     if (evt.key === 'ArrowUp') {
-        evt.preventDefault();                                        //evt.preventDefault(); здесь нужен, т.к при нажатии ArrowUp по умолчанию каретка в input уходит в начало, что нам не нужно
-        typedText.textContent = lastEntered.getSetPrevious();
-        inputField.value = typedText.textContent;
+        typedText.textContent = getLastEntered();
     }
     if (evt.key === 'ArrowDown') {
-        evt.preventDefault();
-        typedText.textContent = lastEntered.getSetNext();
-        inputField.value = typedText.textContent;
+        typedText.textContent = getLastEnteredReverse();
     }
 
     // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
@@ -142,24 +104,6 @@ window.onkeydown = function (evt) {
     // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
 
     if (evt.key === 'Enter') {
-        if (typedText.textContent === 'help') {
-            renderCommandResult(
-                'run (js command) - выполнить любую команду JavaScript и вывести результат в качестве строки\n' +
-                'quote - показать случайную цитату\n' +
-                'type - напечатать случайную цитату в поле ввода\n' +
-                'clear - очистить консоль\n' +
-                'quit - вернуться на главную страницу\n' +
-                'exit - вернуться на главную страницу\n' +
-                '\n' +
-                'Arrow Up, Arrow Down - листать список предыдущих команд назад и вперед соответственно\n' + 
-                'Ctrl + Backspace - удалить всю строку\n'
-                );
-        }
-
-        if (typedText.textContent === 'type') {
-            typeQuote();
-        }
-
         // если строка начинается с 'run ', то выполняем команду и выдаем результат в качестве пишки с классом run-result, если нет, то просто продолжаем выполнение блока, т.е записываем просто текстом
         if (typedText.textContent.slice(0, 4) === 'run ') {
             let command = String(Function('return ' + typedText.textContent.slice(4))());
@@ -176,7 +120,6 @@ window.onkeydown = function (evt) {
 
         // если набрали exit или quit - переходим на главную страницу
         if (typedText.textContent === 'exit' || typedText.textContent === 'quit') {
-
             // window.location.href = 'https://pileofspc.github.io/';
             window.open('https://pileofspc.github.io/', '_self', "noreferrer, noopener")
         }
@@ -186,7 +129,7 @@ window.onkeydown = function (evt) {
         
         
         // Записываем последнее значение в массив, переходим на новую строку, убираем класс, добавляем новую p'шку, и присваиваем ее в переменную typedText
-        lastEntered.pushMax10();
+        lastEnteredPushMax10();
 
         typedText.textContent += '\n';
         if (typedText.className === 'typed-text') {
@@ -201,14 +144,10 @@ window.onkeydown = function (evt) {
 
         typedText = newP;
 
-        //Обнуляем поле ввода и триггерим ивент ввода, т.к сам он не триггерится при изменении через JS
-        inputField.value = '';
-        triggerInputEvent();
-
-        // Обнуляем позицию счетчика последних введенных значений
-        lastEntered.position = -1;
-        // // Переносимся в конец страницы
-        // window.scroll(0, document.body.clientHeight);
+        // Обнуляем счетчик функций последних введенных значений
+        getLastEntered.functionCalledTimes = 0;
+        // Переносимся в конец страницы
+        window.scroll(0, document.body.clientHeight);
     }
 };
 
@@ -241,6 +180,7 @@ function cursorFlickerHide () {
     return
 };
 
+
 // Старт и стоп анимации
 function flicker() {
     setTimeout(cursorFlickerHide, delayVisible);
@@ -255,23 +195,27 @@ function stopFlicker() {
 
 flicker();
 
+// Дурацкая функция для того, чтобы убрать пробелы и переносы строки из HTML кода
+function removeLineBreaks(string) {
+    let stringArray = Array.from(string);
+
+    let bracketCount = 0;
+    stringArray.forEach(function (item, index, array) {
+        if (item === '<') { ++bracketCount };
+        if (item === '>') { --bracketCount };
+
+        if (bracketCount === 0 && (item === '\n' || item === ' ')) {
+            array[index] = '';
+        };
+    });
+    let result = stringArray.join('');
+    return result
+};
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Вывод рандомной цитаты
-
-// Рандомное число в диапазоне - взято с MDN https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;       //Максимум не включается, минимум включается
-}
-
-function triggerInputEvent(){
-    inputField.dispatchEvent(
-        new Event('input', {bubbles:true})
-        );
-}
 
 function getQuote() {
     let quotes = [
@@ -284,6 +228,16 @@ function getQuote() {
         'Волк слабее санитара, но в дурке он не работает.',
         'Никогда не поздно, никогда не рано - поменять все поздно, если это рано.',
     ];
+
+// Рандомное число в диапазоне - взято с MDN https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;       //Максимум не включается, минимум включается
+}
+
+    
     return quotes[getRandomInt(0, quotes.length)];
 }
 
@@ -315,22 +269,23 @@ let letter = new Letter();
 // выполнить метод, чтобы он обновил весь объект и отдача букв пошла заново
 
 function typeQuote() {
-    let listenerArray = [window.onkeydown]                      // в старой версии было несколько значений. пока оставил как массив
-    window.onkeydown = null;
-    inputField.setAttribute('readonly', '');
-    ctrlPressed = false;
-
-    function type() {
-        inputField.value += letter.getSetNext()
-        triggerInputEvent();
-
-        let timerId = setTimeout(type, 50);
+    let func = function () {
+        typedText.textContent += letter.getSetNext()
+        let timerId = setTimeout(func, 50);
         if (letter.done) {
             clearTimeout(timerId);
             window.onkeydown = listenerArray[0];
-            inputField.removeAttribute('readonly');
+            inputField.oninput = listenerArray[1];
         }
     };
-    setTimeout(type, 200);
+    setTimeout(func, 300);
+
+    let listenerArray = [window.onkeydown, inputField.oninput]
+    window.onkeydown = null;
+    inputField.oninput = function () {
+        inputField.value = '';
+    };
+    ctrlPressed = false;
     return 'quote'
 };
+typeQuote();

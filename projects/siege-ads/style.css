@@ -1,8 +1,3 @@
-@font-face {
-  font-family: "Courier New";
-  src: url("fonts/Courier New/courier-new.ttf") format("truetype");
-}
-
 html {
   font-size: 20px;
 }
@@ -13,19 +8,18 @@ body {
 
   background-color: #121212;
   
-  font-family: "Courier New", monospace;
+  font-family:'Courier New', Courier, monospace;
   font-size: 1rem;
-
   color: #dedede;
 }
 
 .page-header {
+  font-family:'Courier New', Courier, monospace;
   font-size: 1.2rem;
 
   border-bottom: 2px solid #dedede;
   padding: 0;
   padding-bottom: 0.8vw;
-  margin-bottom: 20px;
 }
 
 .header-flex {
@@ -78,7 +72,6 @@ body {
 }
 
 .nav-list {
-  font: inherit;
   display: flex;
   margin: 0;
   padding: 0;
@@ -91,12 +84,22 @@ body {
   margin-left: 4vw;
 }
 
-a:hover {
+.page-header a {
+  color: inherit;
+  text-decoration: inherit;
+  
+  transition: 0.15s;
+}
+
+.page-header a:hover {
   color: #26c4c9;
   text-shadow: 0 0 10px #26c4c9;
 }
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: 0.15s;
+
+p {
+  margin: 0;
+}
+
+.inline {
+  display: inline;
 }
