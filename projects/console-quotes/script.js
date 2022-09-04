@@ -56,7 +56,7 @@ window.onclick = function () {
     inputField.focus();
 }
 
-inputField.oninput = function () {
+inputField.oninput = function (evt) {
     typedText.textContent = inputField.value;
     window.scroll(0, document.body.clientHeight);
 };
