@@ -56,7 +56,9 @@ window.onclick = function () {
 }
 
 inputField.oninput = function () {
-    inputField.selectionStart = inputField.value.length;
+    if (typedText.textContent === '') {
+        inputField.value = '';
+    }
     typedText.textContent = inputField.value;
     window.scroll(0, document.body.clientHeight);
 };
@@ -117,6 +119,9 @@ function renderCommandResult(text) {
 }
 
 window.onkeydown = function (evt) {
+    inputField.focus();
+    inputField.selectionStart = inputField.value.length;
+    
     if (evt.key == 'Control') {
         ctrlPressed = true;
     }
