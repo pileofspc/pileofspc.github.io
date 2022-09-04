@@ -37,8 +37,6 @@ p {
   white-space: pre-wrap;
   word-wrap: break-word;
   user-select: none;
-
-  outline: 1px solid white;
 }
 
 .command-result {
@@ -58,7 +56,7 @@ p {
   margin-top: 13px;
 
   background-color: cyan;
-  filter: drop-shadow(0 0 12px cyan);
+  filter: drop-shadow(0 0 4px cyan);
   padding-bottom: 20px;
   background-clip: content-box;
 

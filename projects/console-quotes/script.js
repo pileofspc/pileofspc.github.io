@@ -56,9 +56,6 @@ window.onclick = function () {
 }
 
 inputField.oninput = function () {
-    if (typedText.textContent === '') {
-        inputField.value = '';
-    }
     typedText.textContent = inputField.value;
     window.scroll(0, document.body.clientHeight);
 };
