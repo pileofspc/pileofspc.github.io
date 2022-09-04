@@ -64,13 +64,15 @@ p {
 }
 
 input[type = "text"] {
-  position: absolute;
+  position: fixed;
+  left: 0;
+  top: 0;
   font-size: 1rem;
   margin: 0;
   padding: 0;
 
-  /* width: 0px;
-  opacity: 0; */
+  width: 0px;
+  opacity: 0;
 }
 
 input[type = "text"]:focus,
