@@ -45,6 +45,7 @@ typedText.innerHTML = removeLineBreaks(typedText.innerHTML);    // innerHTML Ð¼Ð
 
 let cursor = document.querySelector(".cursor");
 let inputField = document.querySelector('.input-field');
+let form = document.querySelector('form');
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +60,10 @@ inputField.oninput = function () {
     typedText.textContent = inputField.value;
     window.scroll(0, document.body.clientHeight);
 };
+
+form.onsubmit = function (evt) {
+    evt.preventDefault();
+}
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
