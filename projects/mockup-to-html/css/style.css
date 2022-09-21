@@ -2,10 +2,8 @@ html {
     --header-padding-sides: 20px;
     --header-min-width: 900px;
 
-    --splash-offset-left: 0px;
+    --splash-offset-left: -90px;
     --splash-min-width: calc(var(--header-min-width) + 2 * var(--header-padding-sides) - var(--splash-offset-left));
-
-    /* overflow: hidden; */
 }
 
 /* Общие блоки */

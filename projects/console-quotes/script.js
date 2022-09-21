@@ -11,8 +11,16 @@
 // v - autocomplete вообще напрочь все ломает
 // v - При первой загрузке с телефона ссылки анимируются на главной странице
 // v - надо запретить перемещать каретку или сделать нормальный функционал для этого
+// v - сделать функционал для каретки
+// v - при переносе больших слов курсор его как будто видит на старой строке
+// v - при использовании delete проигрывается анимация (backspace почему-то работает)
+// v - type нормально не работает с перемещением каретки. курсор всегда остается на первой строке
+// v - сделать перемещение по клику
+// v - снимать выделение при клике вне текста
 
-// сделать функционал для каретки
+// при замене выделенного текста на другой текст курсор прыгает на начало
+// допилить функционал выделения
+// сделать цитаты по апишке
 
 
 
@@ -39,6 +47,8 @@ function removeLineBreaks(string) {
 };
 
 // Ищем элементы
+let buddy = document.querySelector('body');
+
 let typedText = document.querySelector('.typed-text');
 typedText.innerHTML = removeLineBreaks(typedText.innerHTML);    // innerHTML меняет элементы внутри себя, поэтому все querySelector'ы, прописанные внутри данного элемента становятся недействительными((((
 
@@ -49,8 +59,27 @@ let inputField = document.querySelector('.input-field');
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Добавляем обработчики и передаем фокус на элемент ввода
 inputField.focus();
-window.onclick = function () {
+document.onclick = function() {
     inputField.focus();
+    inputField.selectionStart = inputField.selectionEnd = inputField.value.length;
+    moveCaret();
+}
+
+typedText.onclick = function (evt) {
+    evt.stopPropagation();
+
+    let savedStartSelection = window.getSelection().anchorOffset;
+    let savedEndSelection = window.getSelection().focusOffset;
+
+    if (savedStartSelection <= savedEndSelection) {
+        inputField.selectionStart = savedStartSelection;
+        inputField.selectionEnd = savedEndSelection;
+    } else {
+        inputField.selectionStart = savedEndSelection;
+        inputField.selectionEnd = savedStartSelection;
+    }
+
+    moveCaret();
 }
 
 inputField.oninput = function () {
@@ -115,8 +144,12 @@ function renderCommandResult(text) {
 
 window.onkeydown = function (evt) {
     inputField.focus();
-    // inputField.selectionStart = inputField.value.length;
-    
+    if (inputField.selectionEnd - inputField.selectionStart !== 0) {
+        cursor.classList.add('cursor-only-opacity');
+    }
+    if (evt.key == 'Delete') {
+        cursor.classList.add('cursor-only-opacity');
+    }
     if (evt.key == 'Control') {
         ctrlPressed = true;
     }
@@ -203,14 +236,14 @@ window.onkeydown = function (evt) {
 
         //Обнуляем поле ввода и триггерим ивент ввода, т.к сам он не триггерится при изменении через JS
         inputField.value = '';
-        triggerInputEvent();
 
         // Обнуляем позицию счетчика последних введенных значений
         lastEntered.position = -1;
-        // // Переносимся в конец страницы
-        // window.scroll(0, document.body.clientHeight);
     }
-    setTimeout(()=>{console.log(inputField.selectionStart)});
+    setTimeout(()=>{
+        moveCaret();
+    });
+    
 };
 
 window.onkeyup = function (evt) {
@@ -223,8 +256,8 @@ window.onkeyup = function (evt) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // АНИМАЦИИ, можно переделать на CSS, просто ради тренировки сделал на JS
-const delayVisible = 500;
-const delayHidden = 400;
+const delayVisible = 600;
+const delayHidden = 300;
 
 // Показать курсор + создать таймаут на след. функцию
 function  cursorFlickerShow () {
@@ -254,7 +287,7 @@ function stopFlicker() {
     cursor.style.opacity = '100%';
 };
 
-flicker();
+// flicker();
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -322,8 +355,9 @@ function typeQuote() {
     ctrlPressed = false;
 
     function type() {
-        inputField.value += letter.getSetNext()
+        inputField.value += letter.getSetNext();
         triggerInputEvent();
+        moveCaret();
 
         let timerId = setTimeout(type, 50);
         if (letter.done) {
@@ -335,3 +369,61 @@ function typeQuote() {
     setTimeout(type, 200);
     return 'quote'
 };
+
+function moveCaret() {
+    function insertSpan(index, className) {
+        let span = '<span>\u2060</span>';
+        let htmlString = typedText.innerHTML;
+        let array = Array.from(htmlString);
+        array.splice(index, 0, span);
+        let result = array.join('');
+        typedText.innerHTML = result;
+
+        let collection = typedText.querySelectorAll('span');
+        for (let element of collection) {
+            if (element.classList.length === 0) {
+                element.classList.add(className);
+            };
+        }
+
+        return result;
+    }
+
+    function getSpanCoordinates(className) {
+        let span = typedText.querySelector(className);
+        let rect = span.getBoundingClientRect();
+        return rect
+    }
+    function removeSpan() {
+        typedText.textContent = inputField.value;
+    }
+
+    insertSpan(inputField.selectionStart, 'selection');
+    let coords = getSpanCoordinates('.selection');
+    removeSpan();
+    insertSpan(inputField.value.length, 'end');
+    let defaultCoords = getSpanCoordinates('.end');
+    removeSpan();
+
+
+    if (coords.y + 'px' !== cursor.style.top) {
+        cursor.classList.add('cursor-only-opacity');
+    };
+
+    cursor.style.transform = `translateX(${coords.x - defaultCoords.x - 10.5}px)`;
+    cursor.style.top = coords.y + 'px';
+    if (inputField.value.length === inputField.selectionStart) {
+        cursor.classList.remove('cursor-line');
+        cursor.style.transform = 'translateX(0)'
+    } else {
+        cursor.classList.add('cursor-line');
+    }
+
+    setTimeout(()=>{
+        if (cursor.classList.contains('cursor-only-opacity')) {
+            cursor.classList.remove('cursor-only-opacity');
+        }
+    }, 10);
+}
+
+cursor.style.top = window.getComputedStyle(cursor).top;

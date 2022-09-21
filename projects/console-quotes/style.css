@@ -24,6 +24,7 @@ body {
   font-family:  "Undertale", "Cambria", sans-serif;
   font-weight: 400;
   color: cyan;
+  letter-spacing: 4px;
   text-shadow: 0 0 8px cyan;
   
   padding-left: 10px;
@@ -36,7 +37,6 @@ p {
 
   white-space: pre-wrap;
   word-wrap: break-word;
-  user-select: none;
 }
 
 .command-result {
@@ -49,18 +49,32 @@ p {
 
 .cursor {
   display: inline-block;
+
+  z-index: -1000;
+
   position: absolute;
   width: 25px;
   height: 40px;
   margin-left: 5px;
-  margin-top: 13px;
+  margin-top: 15px;
 
   background-color: cyan;
   filter: drop-shadow(0 0 4px cyan);
   padding-bottom: 20px;
   background-clip: content-box;
 
-  transition: opacity 0.1s transform 0.2s;
+  transition: opacity 0.1s, transform 0.05s;
+}
+
+.cursor-only-opacity {
+  transition: opacity 0.1s;
+}
+
+.cursor-line {
+  width: 3px;
+  height: 60px;
+
+  margin-top: 1px;
 }
 
 /* С телефона нельзя выставлять width: 0; т.к тогда ПОЧЕМУ-ТО инпут обрезается до последнего слова
@@ -76,13 +90,14 @@ opacity: 0; или filter: opacity(0);
 input[type = "text"] {
   position: fixed;
   left: 0;
-  top: 0;
   font-size: 1rem;
   margin: 0;
   padding: 0;
-
   width: 50%;
+
+  top: -100px;
   opacity: 0;
+  /* top: 300px; */
 }
 
 input[type = "text"]:focus,
