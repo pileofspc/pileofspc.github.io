@@ -17,12 +17,34 @@
 // v - type нормально не работает с перемещением каретки. курсор всегда остается на первой строке
 // v - сделать перемещение по клику
 // v - снимать выделение при клике вне текста
+// v - при замене выделенного текста на другой текст курсор прыгает на начало
 
-// при замене выделенного текста на другой текст курсор прыгает на начало
+// v - если начинать выделять справа  налево, начиная с пустого места после текста, то ничего не выделяется
+// v - не работает shift-click, ctrl-click. Двойной клик работает, случайно так получилось BloodTrail
+
+
+// не будет работать выделение на несколько строк - пока не знаю как поправить
+
+// теряются обработчики после исполнения команды
 // допилить функционал выделения
 // сделать цитаты по апишке
 
 
+
+// надо либо не использовать moveCaret, либо как-то написать selectText так, чтобы он выделял с конца в начало
+
+
+
+// Известные проблемы:
+// 1 -  Вообще архитектурный, так сказать, выбор работать с тегом p, а не непосредственно с инпутом привел к тому, что много стандартного функционала пришлось переписывать самому.
+//      Такой выбор был сделан, потому что input не стилизовался в CSS так, как я хотел. Возможно, это можно было сделать через JS, но выбор был
+//      сделан еще в самом начале, поэтому уже просто его придерживаюсь.
+//      Изначально проект должен был быть другим, по ходу уже приходили новые идеи, отчасти поэтому так и получилось.
+//      Все больше убеждаюсь, что это была большая ошибка...
+// 2 - Для устранения пробелов используется функция, хотя наверное можно было бы сделать через CSS.
+// 3 - Структура кода не приведена в порядок, потому что пока нет понимания как лучше ее выстраивать.
+// 4 - Много где используется setTimeout по причине того, что что-то либо не успевает выполняться, либо выполняется раньше, чем нужно, и либо я пока не знаю как это исправить, либо мне лень.
+// 5 - Хотелось бы уйти от использования innerHTML, но пока не знаю как. Не знаю как вставить элемент после определенного символа текста без innerHTML.
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,34 +79,137 @@ let inputField = document.querySelector('.input-field');
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function selectTextReverse(element, start, end) {
+    let range = new Range();
+    range.setStart(element.firstChild, start);
+    range.setEnd(element.firstChild, end);
+    range.collapse(false);
+
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(range);
+    document.getSelection().extend(element.firstChild, start);
+
+    // console.log(document.getSelection().anchorOffset);
+    // console.log(document.getSelection().focusOffset);
+}
+function selectText(element, start, end) {
+    let range = new Range();
+    range.setStart(element.firstChild, start);
+    range.setEnd(element.firstChild, end);
+
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(range);
+}
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Добавляем обработчики и передаем фокус на элемент ввода
 inputField.focus();
-document.onclick = function() {
+
+
+
+
+let savedStartSelection;
+let savedEndSelection;
+let buffer;
+
+
+
+inputField.onmousedown = function(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    this.focus();
+}
+inputField.onmouseup = function(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    this.blur();
+}
+
+
+
+
+
+
+typedText.onmousedown = function (evt) {
+    evt.stopPropagation();
+
+    if (evt.shiftKey) {
+        if (isReverse) {
+            selectTextReverse(typedText, savedStartSelection, savedEndSelection);
+        } else {
+            selectText(typedText, savedStartSelection, savedEndSelection);
+        }
+    }
+
+    setTimeout(() => {
+        savedStartSelection = window.getSelection().anchorOffset;
+    })
+}
+
+let isReverse = false;
+
+typedText.onmouseup = function(evt) {
+    evt.stopPropagation();
+
+    savedEndSelection = window.getSelection().focusOffset;
+
+    isReverse = false;
+    if (savedStartSelection > savedEndSelection) {
+        isReverse = true;
+
+        buffer = savedStartSelection;
+        savedStartSelection = savedEndSelection;
+        savedEndSelection = buffer;
+    }
+    inputField.selectionStart = savedStartSelection;
+    inputField.selectionEnd = savedEndSelection;
+
+    moveCaret();
     inputField.focus();
-    inputField.selectionStart = inputField.selectionEnd = inputField.value.length;
+}
+document.onmouseup = function (evt) {
+    // if (evt.shiftKey) {
+    //     evt.preventDefault();
+    //     window.getSelection().extend(typedText.firstChild, typedText.textContent.length);
+    // }
+ 
+    savedEndSelection = window.getSelection().focusOffset;
+
+    inputField.selectionStart = savedStartSelection;
+    inputField.selectionEnd = savedEndSelection;
+
+    inputField.focus();
     moveCaret();
 }
 
-typedText.onclick = function (evt) {
-    evt.stopPropagation();
+document.onmousedown = function(evt) {
+    // шифт + клик
+    // или просто клик
 
-    let savedStartSelection = window.getSelection().anchorOffset;
-    let savedEndSelection = window.getSelection().focusOffset;
 
-    if (savedStartSelection <= savedEndSelection) {
-        inputField.selectionStart = savedStartSelection;
-        inputField.selectionEnd = savedEndSelection;
-    } else {
-        inputField.selectionStart = savedEndSelection;
-        inputField.selectionEnd = savedStartSelection;
-    }
+    
 
-    moveCaret();
+    // if (evt.shiftKey) {
+    //     evt.preventDefault();
+    //     console.log('shifted');
+    //     setTimeout(()=>{
+    //         savedEndSelection = window.getSelection().focusOffset;
+    //     })
+    // } else {
+        // setTimeout(()=>{
+        //     savedStartSelection = window.getSelection().anchorOffset;
+        // })
+    // }
 }
 
 inputField.oninput = function () {
     typedText.textContent = inputField.value;
     window.scroll(0, document.body.clientHeight);
+
+    savedStartSelection = savedEndSelection = buffer = null;
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -143,7 +268,15 @@ function renderCommandResult(text) {
 }
 
 window.onkeydown = function (evt) {
-    inputField.focus();
+    // if (evt.key === 'k') {
+    //     evt.preventDefault();
+    //     selectTextReverse(typedText, 3, 6);
+    //     return
+    // }
+    if (evt.key !== 'Shift' && evt.key !== 'Control' && evt.key !== 'Alt') {
+        inputField.focus();
+    }
+
     if (inputField.selectionEnd - inputField.selectionStart !== 0) {
         cursor.classList.add('cursor-only-opacity');
     }
@@ -240,10 +373,11 @@ window.onkeydown = function (evt) {
         // Обнуляем позицию счетчика последних введенных значений
         lastEntered.position = -1;
     }
-    setTimeout(()=>{
-        moveCaret();
-    });
-    
+    if (evt.key !== 'Shift' && evt.key !== 'Control' && evt.key !== 'Alt') {
+        setTimeout(()=>{
+            moveCaret();
+        });
+    }
 };
 
 window.onkeyup = function (evt) {
@@ -370,34 +504,50 @@ function typeQuote() {
     return 'quote'
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function insertSpan(index, className) {
+    let span = '<span>\u2060</span>';
+    let htmlString = typedText.innerHTML;
+    let array = Array.from(htmlString);
+    array.splice(index, 0, span);
+    let result = array.join('');
+    typedText.innerHTML = result;
+
+    let collection = typedText.querySelectorAll('span');
+    for (let element of collection) {
+        if (element.classList.length === 0) {
+            element.classList.add(className);
+        };
+    }
+
+    return result;
+}
+function removeSpan() {
+    typedText.textContent = inputField.value;
+}
+function getSpanCoordinates(className) {
+    let span = typedText.querySelector(className);
+    let rect = span.getBoundingClientRect();
+    return rect
+}
 function moveCaret() {
-    function insertSpan(index, className) {
-        let span = '<span>\u2060</span>';
-        let htmlString = typedText.innerHTML;
-        let array = Array.from(htmlString);
-        array.splice(index, 0, span);
-        let result = array.join('');
-        typedText.innerHTML = result;
-
-        let collection = typedText.querySelectorAll('span');
-        for (let element of collection) {
-            if (element.classList.length === 0) {
-                element.classList.add(className);
-            };
-        }
-
-        return result;
-    }
-
-    function getSpanCoordinates(className) {
-        let span = typedText.querySelector(className);
-        let rect = span.getBoundingClientRect();
-        return rect
-    }
-    function removeSpan() {
-        typedText.textContent = inputField.value;
-    }
-
     insertSpan(inputField.selectionStart, 'selection');
     let coords = getSpanCoordinates('.selection');
     removeSpan();
@@ -426,4 +576,17 @@ function moveCaret() {
     }, 10);
 }
 
-cursor.style.top = window.getComputedStyle(cursor).top;
+// cursor.style.top = window.getComputedStyle(cursor).top;
+
+// window.onkeydown = null;
+// window.onmousedown = null;
+// window.onmouseup = null;
+// document.onkeydown = null;
+// document.onmousedown = null;
+// document.onmouseup = null;
+
+
+// setInterval(() => {
+//     console.clear();
+//     console.log(`start: ${savedStartSelection}, end: ${savedEndSelection}`);
+// }, 100);
