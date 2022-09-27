@@ -21,17 +21,22 @@
 
 // v - если начинать выделять справа  налево, начиная с пустого места после текста, то ничего не выделяется
 // v - не работает shift-click, ctrl-click. Двойной клик работает, случайно так получилось BloodTrail
+// v - надо либо не использовать moveCaret, либо как-то написать selectText так, чтобы он выделял с конца в начало
+// v - допилить функционал выделения
+// v - доделать оформление выделения
+// v - при шифт клике в anchor не происходит анимации
 
+// ? - теряются обработчики после исполнения команды
 
+// не выделяются уже отправленные команды и строки
+// начал делать выделение других строк - перестало копироваться из них по Ctrl + C, т.к при нажатии C срабатывает window.onkeydown
 // не будет работать выделение на несколько строк - пока не знаю как поправить
-
-// теряются обработчики после исполнения команды
-// допилить функционал выделения
+// сделать выделение в реальном времени
 // сделать цитаты по апишке
 
 
 
-// надо либо не использовать moveCaret, либо как-то написать selectText так, чтобы он выделял с конца в начало
+
 
 
 
@@ -79,19 +84,14 @@ let inputField = document.querySelector('.input-field');
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function selectTextReverse(element, start, end) {
-    let range = new Range();
-    range.setStart(element.firstChild, start);
-    range.setEnd(element.firstChild, end);
-    range.collapse(false);
-
-    document.getSelection().removeAllRanges();
-    document.getSelection().addRange(range);
-    document.getSelection().extend(element.firstChild, start);
-
-    // console.log(document.getSelection().anchorOffset);
-    // console.log(document.getSelection().focusOffset);
+function selectInputText(start, end) {
+    if (start <= end) {
+        inputField.selectionStart = start;
+        inputField.selectionEnd = end;
+    } else {
+        inputField.selectionStart = end;
+        inputField.selectionEnd = start;
+    }
 }
 function selectText(element, start, end) {
     let range = new Range();
@@ -101,6 +101,17 @@ function selectText(element, start, end) {
     document.getSelection().removeAllRanges();
     document.getSelection().addRange(range);
 }
+function selectTextReverse(element, start, end) {
+    let range = new Range();
+    range.setStart(element.firstChild, start);
+    range.setEnd(element.firstChild, end);
+    range.collapse(false);
+
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(range);
+    document.getSelection().extend(element.firstChild, start);
+}
+
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,129 +119,120 @@ function selectText(element, start, end) {
 // Добавляем обработчики и передаем фокус на элемент ввода
 inputField.focus();
 
-
-
-
-let savedStartSelection;
-let savedEndSelection;
-let buffer;
-
-
-
-inputField.onmousedown = function(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-    this.focus();
-}
-inputField.onmouseup = function(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-    this.blur();
-}
-
-
-
-
-
-
-typedText.onmousedown = function (evt) {
-    evt.stopPropagation();
-
-    if (evt.shiftKey) {
-        if (isReverse) {
-            selectTextReverse(typedText, savedStartSelection, savedEndSelection);
-        } else {
-            selectText(typedText, savedStartSelection, savedEndSelection);
-        }
-    }
-
-    setTimeout(() => {
-        savedStartSelection = window.getSelection().anchorOffset;
-    })
-}
-
+let savedStart;
+let savedEnd;
 let isReverse = false;
 
-typedText.onmouseup = function(evt) {
-    evt.stopPropagation();
+let selectionTimer;
+let mouseX;
+let mouseY;
 
-    savedEndSelection = window.getSelection().focusOffset;
+let savedRangeBefore;
+let savedRangeAfter;
 
-    isReverse = false;
-    if (savedStartSelection > savedEndSelection) {
-        isReverse = true;
+let hoveredElement;
 
-        buffer = savedStartSelection;
-        savedStartSelection = savedEndSelection;
-        savedEndSelection = buffer;
-    }
-    inputField.selectionStart = savedStartSelection;
-    inputField.selectionEnd = savedEndSelection;
-
-
-    console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
-
-
-    moveCaret();
-    inputField.focus();
+document.onmousemove = function(evt) {
+    mouseX = evt.clientX;
+    mouseY = evt.clientY;
 }
 
-document.onmouseup = function (evt) {
-    // if (evt.shiftKey) {
-    //     evt.preventDefault();
-    //     window.getSelection().extend(typedText.firstChild, typedText.textContent.length);
-    // } else {
-        savedEndSelection = window.getSelection().focusOffset;
-
-        inputField.selectionStart = savedStartSelection;
-        inputField.selectionEnd = savedEndSelection;
-    
-        console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
-
-        inputField.focus();
-        moveCaret();
-    // }
+document.onmouseover = function(evt) {
+    hoveredElement = evt.target;
 }
 
 document.onmousedown = function(evt) {
-    // шифт + клик
-    // или просто клик
     if (evt.shiftKey) {
-        evt.preventDefault();
-        if (!isReverse) {
-            selectText(typedText, inputField.selectionStart, inputField.selectionEnd);
-        } else {
+        if (isReverse) {
             selectTextReverse(typedText, inputField.selectionStart, inputField.selectionEnd);
+        } else {
+            selectText(typedText, inputField.selectionStart, inputField.selectionEnd);
         }
-        window.getSelection().extend(typedText.firstChild, typedText.textContent.length);
-        // setTimeout(() => {
-        //     console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
-        // });
+    }
+    // selectionTimer = setInterval(()=>{
+
+    //     // Всё то же, что при отпускании кнопки за исключением очистки таймера
+    //     if (window.getSelection().anchorOffset > window.getSelection().focusOffset) {
+    //         isReverse = true;
+    //     } else {
+    //         isReverse = false;
+    //     }
+
+    //     savedStart = window.getSelection().anchorOffset;
+    //     savedEnd = window.getSelection().focusOffset;
+
+    //     selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+
+    //     moveCaret();
+    //     setWidth();
+    //     inputField.focus();
+
+
+    //     // Обратно возвращаем выделение
+    //     if (isReverse) {
+    //         selectTextReverse(typedText, inputField.selectionStart, inputField.selectionStart);
+
+    //         // Расширяем до тех пор пока не дойдет до позиции курсора
+    //         let coords = {
+    //             x: 1920
+    //         };
+    //         let coords2 = {
+    //             x: 1920
+    //         };
+    //         while (coords.x >= mouseX) {
+    //             savedRangeBefore = window.getSelection().getRangeAt(0);
+    //             window.getSelection().extend(typedText.firstChild, window.getSelection().focusOffset - 1);
+    //             inputField.selectionStart -= 1;
+    //             savedRangeAfter = window.getSelection().getRangeAt(0);
+
+    //             insertSpan(inputField.selectionStart, 'selection');
+    //             coords = getSpanCoordinates('.selection');
+    //             removeSpan();
+    //             insertSpan(inputField.selectionEnd, 'end');
+    //             coords2 = getSpanCoordinates('.end');
+    //             removeSpan();
+
+    //             window.getSelection().removeAllRanges
+    //             window.getSelection().addRange(savedRangeAfter);
+    //         }
+    //     } else {
+    //         selectText(typedText, inputField.selectionStart, inputField.selectionStart);
+    //     }
+
         
+    // }, 150);
+}
+
+document.onmouseup = function () {
+    if (window.getSelection().anchorOffset > window.getSelection().focusOffset) {
+        isReverse = true;
     } else {
-        setTimeout(() => {
-            savedStartSelection = window.getSelection().anchorOffset;
-        });
+        isReverse = false;
     }
 
-    // if (evt.shiftKey) {
-    //     evt.preventDefault();
-    //     console.log('shifted');
-    //     setTimeout(()=>{
-    //         savedEndSelection = window.getSelection().focusOffset;
-    //     })
-    // } else {
-        // setTimeout(()=>{
-        //     savedStartSelection = window.getSelection().anchorOffset;
-        // })
-    // }
+    savedStart = window.getSelection().anchorOffset;
+    savedEnd = window.getSelection().focusOffset;
+
+    if (hoveredElement === typedText) {
+        selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+
+        moveCaret();
+        setWidth();
+        inputField.focus();
+    } else {
+        moveCaret();
+        setWidth();
+    }
+    
+
+    // clearInterval(selectionTimer);
 }
 
 inputField.oninput = function () {
     typedText.textContent = inputField.value;
     window.scroll(0, document.body.clientHeight);
 
-    savedStartSelection = savedEndSelection = buffer = null;
+    isReverse = false;
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,18 +291,29 @@ function renderCommandResult(text) {
 }
 
 window.onkeydown = function (evt) {
-    if (evt.key === 'k') {
-        evt.preventDefault();
-        console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
-        return
-    }
-    if (evt.key !== 'Shift' && evt.key !== 'Control' && evt.key !== 'Alt') {
+    // if (evt.key === 'k') {
+    //     evt.preventDefault();
+    //     selectTextReverse(typedText, inputField.selectionStart, inputField.selectionEnd);
+    //     window.getSelection().extend(typedText.firstChild, window.getSelection().focusOffset - 1);
+    //     savedRange = window.getSelection().getRangeAt(0);
+    //     console.log(savedRange);
+    //     return
+    // }
+    if (
+        evt.key !== 'Shift' &&
+        evt.key !== 'Control' &&
+        evt.key !== 'Alt' &&
+        evt.key !== 'ArrowLeft' &&
+        evt.key !== 'ArrowUp' &&
+        evt.key !== 'ArrowRight' &&
+        evt.key !== 'ArrowDown'
+        ) {
         inputField.focus();
-    }
-
-    if (inputField.selectionEnd - inputField.selectionStart !== 0) {
         cursor.classList.add('cursor-only-opacity');
     }
+    // if (inputField.selectionEnd - inputField.selectionStart !== 0) {
+        // cursor.classList.add('cursor-only-opacity');
+    // }
     if (evt.key == 'Delete') {
         cursor.classList.add('cursor-only-opacity');
     }
@@ -388,7 +401,7 @@ window.onkeydown = function (evt) {
 
         typedText = newP;
 
-        //Обнуляем поле ввода и триггерим ивент ввода, т.к сам он не триггерится при изменении через JS
+        //Обнуляем поле ввода
         inputField.value = '';
 
         // Обнуляем позицию счетчика последних введенных значений
@@ -397,6 +410,7 @@ window.onkeydown = function (evt) {
     if (evt.key !== 'Shift' && evt.key !== 'Control' && evt.key !== 'Alt') {
         setTimeout(()=>{
             moveCaret();
+            setWidth();
         });
     }
 };
@@ -560,14 +574,17 @@ function insertSpan(index, className) {
 
     return result;
 }
+
 function removeSpan() {
     typedText.textContent = inputField.value;
 }
+
 function getSpanCoordinates(className) {
     let span = typedText.querySelector(className);
     let rect = span.getBoundingClientRect();
     return rect
 }
+
 function moveCaret() {
     insertSpan(inputField.selectionStart, 'selection');
     let coords = getSpanCoordinates('.selection');
@@ -577,9 +594,11 @@ function moveCaret() {
     removeSpan();
 
 
-    if (coords.y + 'px' !== cursor.style.top) {
-        cursor.classList.add('cursor-only-opacity');
-    };
+    // Пока не знаю, стоит ли оставить
+
+    // if (coords.y + 'px' !== cursor.style.top) {
+    //     cursor.classList.add('cursor-only-opacity');
+    // };
 
     cursor.style.transform = `translateX(${coords.x - defaultCoords.x - 10.5}px)`;
     cursor.style.top = coords.y + 'px';
@@ -590,14 +609,38 @@ function moveCaret() {
         cursor.classList.add('cursor-line');
     }
 
-    setTimeout(()=>{
+    setTimeout(() => {
         if (cursor.classList.contains('cursor-only-opacity')) {
             cursor.classList.remove('cursor-only-opacity');
         }
     }, 10);
 }
 
-// cursor.style.top = window.getComputedStyle(cursor).top;
+
+
+
+function computeWidth() {
+    insertSpan(savedStart, 'selection');
+    let coords1 = getSpanCoordinates('.selection');
+    removeSpan();
+    insertSpan(savedEnd, 'end');
+    let coords2 = getSpanCoordinates('.end');
+    removeSpan();
+
+    let result = Math.abs(coords2.x - coords1.x) + 'px';
+    return result;
+}
+
+function setWidth() {
+    cursor.style.width = computeWidth();
+
+    if (inputField.selectionEnd - inputField.selectionStart !== 0) {
+        cursor.classList.add('cursor-frame');
+    } else {
+        cursor.classList.remove('cursor-frame');
+        cursor.style.width = '';
+    }
+}
 
 // window.onkeydown = null;
 // window.onmousedown = null;
@@ -605,9 +648,3 @@ function moveCaret() {
 // document.onkeydown = null;
 // document.onmousedown = null;
 // document.onmouseup = null;
-
-
-// setInterval(() => {
-//     console.clear();
-//     console.log(`start: ${savedStartSelection}, end: ${savedEndSelection}`);
-// }, 100);
