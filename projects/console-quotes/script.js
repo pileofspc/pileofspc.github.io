@@ -167,30 +167,51 @@ typedText.onmouseup = function(evt) {
     inputField.selectionStart = savedStartSelection;
     inputField.selectionEnd = savedEndSelection;
 
+
+    console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+
+
     moveCaret();
     inputField.focus();
 }
+
 document.onmouseup = function (evt) {
     // if (evt.shiftKey) {
     //     evt.preventDefault();
     //     window.getSelection().extend(typedText.firstChild, typedText.textContent.length);
+    // } else {
+        savedEndSelection = window.getSelection().focusOffset;
+
+        inputField.selectionStart = savedStartSelection;
+        inputField.selectionEnd = savedEndSelection;
+    
+        console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+
+        inputField.focus();
+        moveCaret();
     // }
- 
-    savedEndSelection = window.getSelection().focusOffset;
-
-    inputField.selectionStart = savedStartSelection;
-    inputField.selectionEnd = savedEndSelection;
-
-    inputField.focus();
-    moveCaret();
 }
 
 document.onmousedown = function(evt) {
     // шифт + клик
     // или просто клик
-
-
-    
+    if (evt.shiftKey) {
+        evt.preventDefault();
+        if (!isReverse) {
+            selectText(typedText, inputField.selectionStart, inputField.selectionEnd);
+        } else {
+            selectTextReverse(typedText, inputField.selectionStart, inputField.selectionEnd);
+        }
+        window.getSelection().extend(typedText.firstChild, typedText.textContent.length);
+        // setTimeout(() => {
+        //     console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+        // });
+        
+    } else {
+        setTimeout(() => {
+            savedStartSelection = window.getSelection().anchorOffset;
+        });
+    }
 
     // if (evt.shiftKey) {
     //     evt.preventDefault();
@@ -268,11 +289,11 @@ function renderCommandResult(text) {
 }
 
 window.onkeydown = function (evt) {
-    // if (evt.key === 'k') {
-    //     evt.preventDefault();
-    //     selectTextReverse(typedText, 3, 6);
-    //     return
-    // }
+    if (evt.key === 'k') {
+        evt.preventDefault();
+        console.log(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+        return
+    }
     if (evt.key !== 'Shift' && evt.key !== 'Control' && evt.key !== 'Alt') {
         inputField.focus();
     }
