@@ -2,7 +2,7 @@ html {
     --header-padding-sides: 20px;
     --header-min-width: 900px;
 
-    --splash-offset-left: -90px;
+    --splash-offset-left: 0px;
     --splash-min-width: calc(var(--header-min-width) + 2 * var(--header-padding-sides) - var(--splash-offset-left));
 }
 
@@ -18,12 +18,9 @@ html {
     align-items: center;
 }
 
-
 /* Ширина по макету 338px, а здесь больше т.к. изменено название*/
 .container_small {
     max-width: 400px;
-
-    outline: 1px solid wheat;
 }
 
 .title {
@@ -44,7 +41,7 @@ html {
     position: relative;
     padding: 6px 19px 8px;
 
-    margin-left: 18px;
+    /* margin-left: 18px; */
     color: white;
     text-decoration: none;
 }
@@ -69,13 +66,10 @@ html {
 .link_img {
     padding: 0;
     line-height: 0px;
-
-    outline: 1px solid red;
 }
 
 .link_user-agreement {
     padding: 0;
-    margin-left: 0;
 
     font-size: 14px;
     font-weight: 400;
@@ -84,16 +78,24 @@ html {
 
 .img {
     padding: 0;
-
-    outline: 1px solid blue;
 }
+
+
+
+
+
+
+
+
+
 
 /* Body */
 .page {
     margin: 0;
     padding: 0;
     font-family: "Google Sans", sans-serif;
-    background-color: white;
+    color: black;
+    background-color: rgb(248, 248, 248);
 }
 
 .page__splash {
@@ -140,7 +142,6 @@ html {
     border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-/* Хедер -> лого */
 .header__logo {
     display: flex;
     justify-content: flex-start;
@@ -178,7 +179,6 @@ html {
     background-color: rgba(255, 255, 255, 0.62);
 }
 
-/* Хедер -> навигация */
 .header__nav {
     display: flex;
     justify-content: space-between;
@@ -189,6 +189,10 @@ html {
     font-size: 14px;
 
     height: 30px;
+}
+
+.header__link {
+    margin-left: 18px;
 }
 
 .header__info {
@@ -209,6 +213,108 @@ html {
     height: 16px;
     background-color: rgba(255, 255, 255, 0.62);
 }
+
+
+/* Intro */
+
+.intro {
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding-top: 74px;
+
+    color: white;
+}
+
+.h1 {
+    width: 688px;
+
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 46px;
+
+    margin: 16px 0;
+}
+
+.intro__text {
+    width: 560px;
+
+    font-family: Manrope, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    
+    margin-bottom: 30px;
+}
+
+.intro__link {
+    padding: 16px 72px;
+}
+
+.intro__clubs {
+    padding-top: 80px;
+    width: 533px;
+}
+
+.intro__club-description {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+
+    margin-bottom: 14px;
+}
+
+.intro__club-icons {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: space-between;
+    align-items: center;
+
+    width: 500px
+}
+
+.intro__club-link {
+    position: relative;
+
+    width: 50px;
+    height: 50px;
+}
+
+.intro__club-img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+
+    display: block;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Footer */
 
@@ -236,7 +342,6 @@ html {
     padding-bottom: 76px;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    outline: 1px solid wheat;
 }
 
 .footer__description {
@@ -248,23 +353,17 @@ html {
     line-height: 36px;
     text-align: left;
     letter-spacing: -0.02em;
-
-    outline: 1px solid red;
 }
 
 .footer__nav {
     flex-grow: 1;
     max-width: 240px;
     min-width: fit-content;
-
-    outline: 1px solid magenta;
 }
 
 .link_style1 {
     font-size: 17px;
     line-height: 20px;
-
-    outline: 1px solid gray;
 }
 
 .link_style2 {
@@ -302,9 +401,6 @@ html {
     gap: 18px;
 
     width: 224px;
-    
-
-    outline: 1px solid green;
 }
 
 .footer__socials {
@@ -338,12 +434,6 @@ html {
     font-size: 14px;
     font-weight: 400;
     line-height: 19px;
-
-    outline: 1px solid purple;
-}
-
-.footer__copyright * {
-    outline: 1px solid white;
 }
 
 .footer__user-agreement {
@@ -351,6 +441,6 @@ html {
     text-underline-offset: 3.5px;
 }
 
-* {
+/* * {
     outline: none!important;
-}
+} */
