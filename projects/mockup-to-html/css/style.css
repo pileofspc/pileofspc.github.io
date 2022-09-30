@@ -1,26 +1,45 @@
-html {
-    --header-padding-sides: 20px;
-    --header-min-width: 900px;
-
-    --splash-offset-left: 0px;
-    --splash-min-width: calc(var(--header-min-width) + 2 * var(--header-padding-sides) - var(--splash-offset-left));
-}
+/* .main .container {
+    outline: 1px solid red;
+} */
 
 /* Общие блоки */
-.container {
-    width: 100%;
-    max-width: 1076px;
-    margin-left: auto;
-    margin-right: auto;
 
+.container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    max-width: 1076px;
+    min-width: 900px;
+    /* width: 100%; */
+
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-/* Ширина по макету 338px, а здесь больше т.к. изменено название*/
+/* Ширина по макету 338px, а здесь больше т.к. изменено название компании*/
 .container_small {
+    width: 100%;
     max-width: 400px;
+    min-width: 0;
+}
+
+.h1 {
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 46px;
+
+    margin: 16px 0;
+}
+
+.h5 {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 27px;
+    font-weight: 700;
+    color: #041121;
 }
 
 .title {
@@ -41,7 +60,6 @@ html {
     position: relative;
     padding: 6px 19px 8px;
 
-    /* margin-left: 18px; */
     color: white;
     text-decoration: none;
 }
@@ -82,14 +100,12 @@ html {
 
 
 
-
-
-
-
-
+/* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 
 
 /* Body */
+
 .page {
     margin: 0;
     padding: 0;
@@ -99,6 +115,9 @@ html {
 }
 
 .page__splash {
+    --splash-offset-left: 0px;
+
+
     position: absolute;
     z-index: -100;
 
@@ -109,7 +128,7 @@ html {
     left: var(--splash-offset-left);
 
     width: calc(100% - var(--splash-offset-left));
-    min-width: var(--splash-min-width);
+    min-width: calc(900px + 2 * 20px - var(--splash-offset-left));
 
     height: 663px;
 
@@ -122,15 +141,16 @@ html {
     background-repeat: no-repeat;
 }
 
+
 /* Header */
+
 .header {
     display: flex;
     justify-content: center;
     align-items: center;
 
-    min-width: var(--header-min-width);
-    padding-left: var(--header-padding-sides);
-    padding-right: var(--header-padding-sides);
+    width: 100%;
+    min-width: 940px;
     height: 55px;
 }
 
@@ -140,6 +160,10 @@ html {
 
 .header_border_white {
     border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.header__inner {
+    width: 100%;
 }
 
 .header__logo {
@@ -215,6 +239,13 @@ html {
 }
 
 
+/* Main */
+
+.main {
+    width: 100%;
+    min-width: 940px;
+}
+
 /* Intro */
 
 .intro {
@@ -226,14 +257,8 @@ html {
     color: white;
 }
 
-.h1 {
+.intro__h1 {
     width: 688px;
-
-    font-size: 46px;
-    font-weight: 700;
-    line-height: 46px;
-
-    margin: 16px 0;
 }
 
 .intro__text {
@@ -242,12 +267,13 @@ html {
     font-family: Manrope, sans-serif;
     font-weight: 500;
     font-size: 16px;
-    
+
     margin-bottom: 30px;
 }
 
 .intro__link {
     padding: 16px 72px;
+    font-weight: 500;
 }
 
 .intro__clubs {
@@ -271,7 +297,9 @@ html {
     justify-content: space-between;
     align-items: center;
 
-    width: 500px
+    width: 500px;
+
+    margin-bottom: 87px;
 }
 
 .intro__club-link {
@@ -308,6 +336,60 @@ html {
 
 
 
+.sports {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    color: white;
+}
+
+.sports__h5 {
+    margin: 34px 0;
+}
+
+.sports-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    width: 100%;
+}
+
+.sports-list__card {
+    position: relative;
+
+    width: calc(177px*0.9375);
+    height: calc(198px*0.9375);
+
+    padding: 0;
+
+    background-color: rgb(13, 26, 39);
+    border-radius: 7px;
+    filter: drop-shadow(0px 4px 9px rgba(0, 0, 0, 0.35));
+}
+
+.sports-list__img {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    background: url('../images/sport_1.png') top left no-repeat;
+    background-size: 100%;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 1000;
+    /* outline: 1px solid salmon; */
+}
+
+
+
+
+
 
 
 
@@ -319,29 +401,34 @@ html {
 /* Footer */
 
 .footer {
-    display: flex;
+    display: block;
 
     background-color: rgb(15, 27, 39);
     height: 560px;
 
-    min-width: var(--header-min-width);
-    padding-left: var(--header-padding-sides);
-    padding-right: var(--header-padding-sides);
+    width: 100%;
+    min-width: 940px;
 
     color: white;
 }
 
 .footer__inner {
+    display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .footer__main {
-    align-items: flex-start;
+    /* align-items: flex-start; */
 
+    padding-left: 0;
+    padding-right: 0;
     padding-top: 90px;
     padding-bottom: 76px;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+    width: 100%;
 }
 
 .footer__description {
@@ -404,6 +491,9 @@ html {
 }
 
 .footer__socials {
+    padding-left: 0;
+    padding-right: 0;
+
     margin-left: 0;
     padding-top: 40px;
 
