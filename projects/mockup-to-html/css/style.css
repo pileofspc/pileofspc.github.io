@@ -94,6 +94,16 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
+.link-button {
+    width: 35px;
+    height: 35px;
+
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: url('../images/arrow.svg') 55% center no-repeat, rgb(255, 32, 32);
+}
+
 .img {
     padding: 0;
 }
@@ -252,7 +262,7 @@
     flex-direction: column;
     align-items: flex-start;
 
-    padding-top: 74px;
+    padding-top: 85px;
 
     color: white;
 }
@@ -277,7 +287,7 @@
 }
 
 .intro__clubs {
-    padding-top: 80px;
+    padding-top: 75px;
     width: 533px;
 }
 
@@ -297,9 +307,11 @@
     justify-content: space-between;
     align-items: center;
 
+    height: 75px;
+
     width: 500px;
 
-    margin-bottom: 87px;
+    margin-bottom: 30px;
 }
 
 .intro__club-link {
@@ -356,7 +368,13 @@
     width: 100%;
 }
 
-.sports-list__card {
+.sport-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    overflow: hidden;
+
     position: relative;
 
     width: calc(177px*0.9375);
@@ -369,21 +387,69 @@
     filter: drop-shadow(0px 4px 9px rgba(0, 0, 0, 0.35));
 }
 
-.sports-list__img {
-    display: block;
+.sport-card:not(:first-child) {
+    margin-left: 2px;
+}
+
+.sport-card:not(.sport-card_inactive)::after {
+    content: '';
+    position: absolute;
+
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(rgba(13, 26, 39, 0), #0D1A27);
+
+    z-index: -900;
+}
+
+.sport-card_inactive::before {
+    content: 'Скоро';
+    position: absolute;
+    left: 14px;
+    top: 19px;
+
+    font: 500 14px 'Google Sans', sans-serif;
+    color: rgb(255, 42, 42);
+}
+
+.sport-card_inactive .sport-card__img {
+    opacity: 30%;
+}
+
+.sport-card_inactive .sport-card__button{
+    visibility: hidden;
+}
+
+.sport-card__img {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    
+    width: auto;
+    height: 101%;
 
-    background: url('../images/sport_1.png') top left no-repeat;
-    background-size: 100%;
+    z-index: -1000;
+}
 
-    width: 100%;
-    height: 100%;
+.sport-card__menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 
-    z-index: 1000;
-    /* outline: 1px solid salmon; */
+    /* height: 50px; */
+    margin-top: auto;
+    padding: 12px 9px;
+}
+
+.sport-card__title {
+    font-family: 'Google Sans', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
 }
 
 
@@ -416,10 +482,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+
+    height: 100%;
 }
 
 .footer__main {
-    /* align-items: flex-start; */
+    align-items: flex-start;
 
     padding-left: 0;
     padding-right: 0;
