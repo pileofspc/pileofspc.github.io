@@ -1,6 +1,6 @@
-/* .main .container {
-    outline: 1px solid red;
-} */
+:root {
+    --scale: 0.9375;
+}
 
 /* Общие блоки */
 
@@ -8,6 +8,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    flex-direction: column;
 
     margin-left: auto;
     margin-right: auto;
@@ -174,6 +176,7 @@
 
 .header__inner {
     width: 100%;
+    flex-direction: row;
 }
 
 .header__logo {
@@ -259,7 +262,6 @@
 /* Intro */
 
 .intro {
-    flex-direction: column;
     align-items: flex-start;
 
     padding-top: 85px;
@@ -350,7 +352,6 @@
 
 .sports {
     display: flex;
-    flex-direction: column;
     align-items: flex-start;
 
     color: white;
@@ -370,15 +371,14 @@
 
 .sport-card {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
     
     overflow: hidden;
 
     position: relative;
 
-    width: calc(177px*0.9375);
-    height: calc(198px*0.9375);
+    width: calc(177px * var(--scale));
+    height: calc(198px * var(--scale));
 
     padding: 0;
 
@@ -457,6 +457,32 @@
 
 
 
+/* Self-ad */
+
+.self-ad {
+
+}
+
+.ad-cards {
+    flex-direction: row;
+    justify-content: space-between;
+
+    width: 100%;
+    padding: 0;
+}
+
+.ad-card {
+    width: calc(361px * var(--scale));
+    height: calc(386px * var(--scale));
+
+    outline: 1px solid rebeccapurple;
+}
+
+.ad-card:not(:first-child) {
+    margin-left: 5px;
+}
+
+
 
 
 
@@ -480,7 +506,6 @@
 
 .footer__inner {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: flex-start;
 
@@ -488,6 +513,7 @@
 }
 
 .footer__main {
+    flex-direction: row;
     align-items: flex-start;
 
     padding-left: 0;
@@ -512,17 +538,17 @@
 }
 
 .footer__nav {
-    flex-grow: 1;
+    /* flex-grow: 1; */
     max-width: 240px;
     min-width: fit-content;
 }
 
-.link_style1 {
+.footer__link_style1 {
     font-size: 17px;
     line-height: 20px;
 }
 
-.link_style2 {
+.footer__link_style2 {
     width: 224px;
 
     padding-top: 19px;
@@ -537,7 +563,22 @@
     text-align: center;
 }
 
-.link_style2-border_white {
+.footer__link_style3 {
+    width: 224px;
+
+    padding-top: 19px;
+    padding-bottom: 19px;
+
+    background-color: white;
+    border-radius: 4px;
+
+    font-size: 17px;
+    font-weight: 700;
+    color: rgb(15, 27, 39);
+    text-align: center;
+
+
+
     color: white;
 
     background-color: transparent;
@@ -560,6 +601,8 @@
 }
 
 .footer__socials {
+    flex-direction: row;
+
     padding-left: 0;
     padding-right: 0;
 
@@ -583,6 +626,7 @@
 
 .footer__copyright {
     align-items: baseline;
+    flex-direction: row;
 
     margin-top: auto;
     margin-bottom: 29px;
