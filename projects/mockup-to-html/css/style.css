@@ -16,11 +16,21 @@
 
     max-width: 1076px;
     min-width: 900px;
-    /* width: 100%; */
+    width: 100%;
 
     padding-left: 20px;
     padding-right: 20px;
 }
+
+/* .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    min-width: 940px;
+    height: 55px;
+} */
 
 .container_inner {
     padding-left: 0;
@@ -172,8 +182,6 @@
 .page__intro {
     margin-top: 85px;
     margin-bottom: 40px;
-
-    width: 100%;
 }
 
 .page__sports {
@@ -284,8 +292,17 @@
 /* Main */
 
 .main {
-    /* width: 100%;
-    min-width: 940px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    min-width: 940px;
+}
+
+.main__inner {
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 /* Intro */
@@ -293,6 +310,8 @@
 .intro {
     align-items: flex-start;
     justify-content: flex-start;
+
+    /* width: 100%; */
 
     color: white;
 }
@@ -340,8 +359,6 @@
     height: 75px;
 
     width: 500px;
-
-    /* margin-bottom: 30px; */
 }
 
 .intro__club-link {
