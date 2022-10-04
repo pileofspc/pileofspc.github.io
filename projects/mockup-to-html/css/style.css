@@ -22,6 +22,11 @@
     padding-right: 20px;
 }
 
+.container_inner {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 /* Ширина по макету 338px, а здесь больше т.к. изменено название компании*/
 .container_small {
     width: 100%;
@@ -144,13 +149,36 @@
 
     height: 663px;
 
+    background: url(../images/main-splash.jpg) center top no-repeat;
     background-color: rgb(13, 25, 37);
 }
 
-.splash {
-    background-image: url(../images/main-splash.jpg);
-    background-position: center top;
-    background-repeat: no-repeat;
+/* .gradient {
+    content: '';
+    position: absolute;
+
+    right: 0;
+    top: 0;
+
+    width: 400px;
+    height: 663px;
+    background: linear-gradient(to right, transparent, rgb(13, 25, 37)) 94% top / 50px no-repeat, ;
+} */
+
+.page__main {
+
+}
+
+.page__intro {
+    margin-top: 85px;
+    margin-bottom: 40px;
+
+    width: 100%;
+}
+
+.page__sports {
+    margin-bottom: 50px;
+    margin-top: 34px;
 }
 
 
@@ -177,6 +205,7 @@
 .header__inner {
     width: 100%;
     flex-direction: row;
+    justify-content: space-between;
 }
 
 .header__logo {
@@ -255,16 +284,15 @@
 /* Main */
 
 .main {
-    width: 100%;
-    min-width: 940px;
+    /* width: 100%;
+    min-width: 940px; */
 }
 
 /* Intro */
 
 .intro {
     align-items: flex-start;
-
-    padding-top: 85px;
+    justify-content: flex-start;
 
     color: white;
 }
@@ -313,7 +341,7 @@
 
     width: 500px;
 
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */
 }
 
 .intro__club-link {
@@ -351,14 +379,17 @@
 
 
 .sports {
-    display: flex;
     align-items: flex-start;
+    justify-content: space-between;
+
+    width: 100%;
 
     color: white;
 }
 
 .sports__h5 {
-    margin: 34px 0;
+    margin-top: 0;
+    margin-bottom: 34px;
 }
 
 .sports-list {
@@ -435,13 +466,15 @@
     z-index: -1000;
 }
 
-.sport-card__menu {
+.sport-card__bottom {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 
+    width: 100%;
     /* height: 50px; */
+
     margin-top: auto;
     padding: 12px 9px;
 }
@@ -460,7 +493,10 @@
 /* Self-ad */
 
 .self-ad {
+    display: flex;
+    justify-content: space-between;
 
+    width: 100%;
 }
 
 .ad-cards {
@@ -482,6 +518,19 @@
     margin-left: 5px;
 }
 
+.h2 {
+    font-family: 'Google Sans', sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+}
+
+.self-ad__h2 {
+    padding: 0;
+    margin: 0;
+
+    width: 700px;
+    text-align: center;
+}
 
 
 
@@ -515,11 +564,12 @@
 .footer__main {
     flex-direction: row;
     align-items: flex-start;
+    justify-content: space-between;
 
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 90px;
+    padding: 0;
     padding-bottom: 76px;
+    margin-top: 90px;
+
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 
@@ -602,12 +652,13 @@
 
 .footer__socials {
     flex-direction: row;
+    justify-content: space-between;
 
     padding-left: 0;
     padding-right: 0;
 
     margin-left: 0;
-    padding-top: 40px;
+    margin-top: 40px;
 
     font-size: 24.5px;
     font-weight: 700;
@@ -627,6 +678,7 @@
 .footer__copyright {
     align-items: baseline;
     flex-direction: row;
+    justify-content: space-between;
 
     margin-top: auto;
     margin-bottom: 29px;
