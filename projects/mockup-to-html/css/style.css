@@ -559,7 +559,9 @@
 /* Footer */
 
 .footer {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     background-color: rgb(15, 27, 39);
     height: 560px;
