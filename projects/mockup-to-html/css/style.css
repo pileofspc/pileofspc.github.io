@@ -607,12 +607,18 @@
     margin-bottom: 143px;
 }
 
+.con-list__con:last-child {
+    margin-bottom: 210px;
+}
+
 .con {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 
-    max-width: calc(1020px * var(--scale));
+    align-items: center;
+
+    max-width: calc(1100px * var(--scale));
     width: 100%;
 }
 
@@ -620,8 +626,10 @@
     align-self: flex-end;
 }
 
-.con_pos-right *:first-child {
+.con_pos-right > .con__img {
     order: 2;
+    margin-right: 0;
+    margin-left: 20px;
 }
 
 .con__img {
@@ -633,7 +641,7 @@
 
 .con__right {
     flex-direction: column;
-    width: 437px;
+    width: 500px;
 }
 
 .con__who {
@@ -669,7 +677,34 @@
     text-align: left;
 }
 
+.con__bulletpoint-list {
+    padding-left: 35px;
+}
 
+.con__bulletpoint-list-item {
+    font-family: 'Google Sans';
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    text-align: left;
+
+    list-style: none;
+
+    position: relative;
+}
+
+.con__bulletpoint-list-item::before {
+    position: absolute;
+    content: '';
+
+    width: 17px;
+    height: 13px;
+
+    background: url('../images/red-tick.svg') center center no-repeat;
+
+    left: -35px;
+    top: 7px;
+}
 
 
 
