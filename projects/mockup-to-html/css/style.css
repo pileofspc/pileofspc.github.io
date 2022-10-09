@@ -34,6 +34,10 @@
     min-width: 0;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .title {
     color: rgb(255, 255, 255);
     font-family: "Google Sans", sans-serif;
@@ -266,6 +270,7 @@
 
 .main {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
@@ -705,6 +710,89 @@
     left: -35px;
     top: 7px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Transfer */
+
+.transfer {
+    flex-direction: row;
+    justify-content: center;
+
+    height: 686px;
+    
+    background: url('../images/transfer-splash.jpg') center center no-repeat;
+    background-color: rgb(12, 25, 39);
+    
+
+    max-width: none;
+    width: 100%;
+}
+
+.transfer-card {
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+    padding: min(6vw, 46px);
+    width: 560px;
+    height: 310px;
+
+    border-radius: 7px;
+
+    background-color: white;
+}
+
+.transfer__card {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.transfer__h2 {
+    font-family: 'Google Sans';
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 25px;
+
+    text-align: left;
+
+    margin: 0;
+    margin-bottom: 16px;
+}
+
+.transfer__text {
+    font-family: 'Google Sans';
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+
+    text-align: left;
+}
+
+.transfer__link {
+    padding: 17px 19px;
+
+    width: 330px;
+    height: 55px;
+
+    margin-top: auto;
+}
+
+
+
+
 
 
 
