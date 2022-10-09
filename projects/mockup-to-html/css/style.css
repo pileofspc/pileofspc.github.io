@@ -54,7 +54,6 @@
     box-sizing: border-box;
 
     position: relative;
-    padding: 6px 19px 8px;
 
     color: white;
     text-decoration: none;
@@ -244,6 +243,7 @@
 
 .header__link {
     margin-left: 18px;
+    padding: 6px 19px 8px;
 }
 
 .header__info {
