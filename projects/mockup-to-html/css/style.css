@@ -861,6 +861,11 @@
     min-width: fit-content;
 }
 
+.footer__link {
+    margin: 0;
+    padding: 6px 19px 8px;
+}
+
 .footer__link_style1 {
     font-size: 17px;
     line-height: 20px;
@@ -903,10 +908,6 @@
     border-radius: 4px;
 
     border: 1px solid white;
-}
-
-.footer__link {
-    margin: 0;
 }
 
 .footer__login {
