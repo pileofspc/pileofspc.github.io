@@ -31,6 +31,7 @@
 // не выделяются уже отправленные команды и строки
 // начал делать выделение других строк - перестало копироваться из них по Ctrl + C, т.к при нажатии C срабатывает window.onkeydown
 // не будет работать выделение на несколько строк - пока не знаю как поправить
+
 // сделать выделение в реальном времени
 // сделать цитаты по апишке
 
@@ -45,7 +46,7 @@
 //      Такой выбор был сделан, потому что input не стилизовался в CSS так, как я хотел. Возможно, это можно было сделать через JS, но выбор был
 //      сделан еще в самом начале, поэтому уже просто его придерживаюсь.
 //      Изначально проект должен был быть другим, по ходу уже приходили новые идеи, отчасти поэтому так и получилось.
-//      Все больше убеждаюсь, что это была большая ошибка...
+//      Все больше убеждаюсь, что это была ошибка...
 // 2 - Для устранения пробелов используется функция, хотя наверное можно было бы сделать через CSS.
 // 3 - Структура кода не приведена в порядок, потому что пока нет понимания как лучше ее выстраивать.
 // 4 - Много где используется setTimeout по причине того, что что-то либо не успевает выполняться, либо выполняется раньше, чем нужно, и либо я пока не знаю как это исправить, либо мне лень.
@@ -149,6 +150,8 @@ let savedRangeBefore;
 let savedRangeAfter;
 
 let hoveredElement;
+let hoveredElementOnMouseDown;
+let hoveredElementOnMouseUp;
 
 document.onmousemove = function(evt) {
     mouseX = evt.clientX;
@@ -160,6 +163,7 @@ document.onmouseover = function(evt) {
 }
 
 document.onmousedown = function(evt) {
+    hoveredElementOnMouseDown = hoveredElement;
     if (evt.shiftKey) {
         if (isReverse) {
             selectTextReverse(typedText, inputField.selectionStart, inputField.selectionEnd);
@@ -222,6 +226,7 @@ document.onmousedown = function(evt) {
 }
 
 document.onmouseup = function () {
+    hoveredElementOnMouseUp = hoveredElement;
     if (window.getSelection().anchorOffset > window.getSelection().focusOffset) {
         isReverse = true;
     } else {
@@ -231,15 +236,19 @@ document.onmouseup = function () {
     savedStart = window.getSelection().anchorOffset;
     savedEnd = window.getSelection().focusOffset;
 
-    if (hoveredElement === typedText) {
-        selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+    if (hoveredElementOnMouseDown !== hoveredElementOnMouseUp) {
+        console.log('ошибка');
+    }
 
-        moveCaret();
-        setWidth();
-        inputField.focus();
+    if (hoveredElementOnMouseUp === typedText) {
+        // selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
+
+        moveCaret(hoveredElementOnMouseUp);
+        // setWidth(hoveredElementOnMouseUp);
+        // inputField.focus();
     } else {
-        moveCaret();
-        setWidth();
+        moveCaret(hoveredElementOnMouseUp);
+        // setWidth(hoveredElementOnMouseUp);
     }
     
 
@@ -544,7 +553,7 @@ function typeQuote() {
     function type() {
         inputField.value += letter.getSetNext();
         triggerInputEvent();
-        moveCaret();
+        moveCaret(typedText);
 
         let timerId = setTimeout(type, 50);
         if (letter.done) {
@@ -575,15 +584,15 @@ function typeQuote() {
 
 
 
-function insertSpan(index, className) {
+function insertSpan(element, index, className) {
     let span = '<span>\u2060</span>';
-    let htmlString = typedText.innerHTML;
+    let htmlString = element.innerHTML;
     let array = Array.from(htmlString);
     array.splice(index, 0, span);
     let result = array.join('');
-    typedText.innerHTML = result;
+    element.innerHTML = result;
 
-    let collection = typedText.querySelectorAll('span');
+    let collection = element.querySelectorAll('span');
     for (let element of collection) {
         if (element.classList.length === 0) {
             element.classList.add(className);
@@ -593,23 +602,43 @@ function insertSpan(index, className) {
     return result;
 }
 
-function removeSpan() {
-    typedText.textContent = inputField.value;
+function removeSpan(element) {
+    let collection = element.querySelectorAll('span');
+    for (let item of collection) {
+        item.remove();
+    }
 }
 
-function getSpanCoordinates(className) {
-    let span = typedText.querySelector(className);
+function getSpanCoordinates(element, className) {
+    let span = element.querySelector(className);
     let rect = span.getBoundingClientRect();
     return rect
 }
 
-function moveCaret() {
-    insertSpan(inputField.selectionStart, 'selection');
-    let coords = getSpanCoordinates('.selection');
-    removeSpan();
-    insertSpan(inputField.value.length, 'end');
-    let defaultCoords = getSpanCoordinates('.end');
-    removeSpan();
+function getLeftmostIndex() {
+    let start;
+    let end;
+
+    if (savedEnd >= savedStart) {
+        start = savedStart;
+        end = savedEnd;
+    } else {
+        start = savedEnd;
+        end = savedStart;
+    }
+
+    return start;
+}
+
+
+
+function moveCaret(element) {
+    insertSpan(element, getLeftmostIndex(), 'selection');
+    let coords = getSpanCoordinates(element, '.selection');
+    removeSpan(element);
+    insertSpan(element, element.textContent.length, 'end');
+    let defaultCoords = getSpanCoordinates(element, '.end');
+    removeSpan(element);
 
 
     // Пока не знаю, стоит ли оставить
@@ -620,7 +649,7 @@ function moveCaret() {
 
     cursor.style.transform = `translateX(${coords.x - defaultCoords.x - 10.5}px)`;
     cursor.style.top = coords.y + 'px';
-    if (inputField.value.length === inputField.selectionStart) {
+    if (savedStart === savedEnd && savedEnd === element.textContent.length) {
         cursor.classList.remove('cursor-line');
         cursor.style.transform = 'translateX(0)'
     } else {
@@ -637,13 +666,13 @@ function moveCaret() {
 
 
 
-function computeWidth() {
-    insertSpan(savedStart, 'selection');
-    let coords1 = getSpanCoordinates('.selection');
-    removeSpan();
-    insertSpan(savedEnd, 'end');
-    let coords2 = getSpanCoordinates('.end');
-    removeSpan();
+function computeWidth(element) {
+    insertSpan(element, savedStart, 'selection');
+    let coords1 = getSpanCoordinates(element, '.selection');
+    removeSpan(element);
+    insertSpan(element, savedEnd, 'end');
+    let coords2 = getSpanCoordinates(element, '.end');
+    removeSpan(element);
 
     let result = Math.abs(coords2.x - coords1.x) + 'px';
     return result;
@@ -652,7 +681,7 @@ function computeWidth() {
 function setWidth() {
     cursor.style.width = computeWidth();
 
-    if (inputField.selectionEnd - inputField.selectionStart !== 0) {
+    if (savedEnd === savedStart) {
         cursor.classList.add('cursor-frame');
     } else {
         cursor.classList.remove('cursor-frame');
