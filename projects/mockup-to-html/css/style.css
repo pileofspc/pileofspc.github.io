@@ -6,10 +6,9 @@
 
 .container {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
-
-    flex-direction: column;
 
     margin-left: auto;
     margin-right: auto;
@@ -140,18 +139,6 @@
     background: url(../images/main-splash.jpg) center top no-repeat;
     background-color: rgb(13, 25, 37);
 }
-
-/* .gradient {
-    content: '';
-    position: absolute;
-
-    right: 0;
-    top: 0;
-
-    width: 400px;
-    height: 663px;
-    background: linear-gradient(to right, transparent, rgb(13, 25, 37)) 94% top / 50px no-repeat, ;
-} */
 
 .page__main {
 
