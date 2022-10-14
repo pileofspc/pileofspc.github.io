@@ -164,13 +164,16 @@ document.onmouseover = function(evt) {
 
 document.onmousedown = function(evt) {
     hoveredElementOnMouseDown = hoveredElement;
-    if (evt.shiftKey) {
-        if (isReverse) {
-            selectTextReverse(typedText, inputField.selectionStart, inputField.selectionEnd);
-        } else {
-            selectText(typedText, inputField.selectionStart, inputField.selectionEnd);
-        }
+
+    if (!evt.shiftKey) {
+        window.getSelection().removeAllRanges();
+    } 
+
+    if (evt.target.tagName !== 'P' && !evt.shiftKey) {
+        evt.preventDefault();
+        selectText(typedText, typedText.textContent.length, typedText.textContent.length)
     }
+
     // selectionTimer = setInterval(()=>{
 
     //     // Всё то же, что при отпускании кнопки за исключением очистки таймера
@@ -227,6 +230,10 @@ document.onmousedown = function(evt) {
 
 document.onmouseup = function () {
     hoveredElementOnMouseUp = hoveredElement;
+    if (hoveredElementOnMouseUp.tagName !== 'P') {
+        hoveredElementOnMouseUp = typedText;
+    }
+
     if (window.getSelection().anchorOffset > window.getSelection().focusOffset) {
         isReverse = true;
     } else {
@@ -236,9 +243,9 @@ document.onmouseup = function () {
     savedStart = window.getSelection().anchorOffset;
     savedEnd = window.getSelection().focusOffset;
 
-    if (hoveredElementOnMouseDown !== hoveredElementOnMouseUp) {
-        console.log('ошибка');
-    }
+    // if (hoveredElementOnMouseDown !== hoveredElementOnMouseUp) {
+    //     console.log('ошибка');
+    // }
 
     if (hoveredElementOnMouseUp === typedText) {
         // selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
@@ -318,14 +325,11 @@ function renderCommandResult(text) {
 }
 
 window.onkeydown = function (evt) {
-    // if (evt.key === 'k') {
-    //     evt.preventDefault();
-    //     selectTextReverse(typedText, inputField.selectionStart, inputField.selectionEnd);
-    //     window.getSelection().extend(typedText.firstChild, window.getSelection().focusOffset - 1);
-    //     savedRange = window.getSelection().getRangeAt(0);
-    //     console.log(savedRange);
-    //     return
-    // }
+    if (evt.key === 'k') {
+        evt.preventDefault();
+        console.log(hoveredElement.tagName);
+        return
+    }
     if (
         evt.key !== 'Shift' &&
         evt.key !== 'Control' &&
@@ -582,24 +586,19 @@ function typeQuote() {
 
 
 
-
+// Возможно надо будет поменять на пограничных случаях, когда не получится разделить текст
 
 function insertSpan(element, index, className) {
-    let span = '<span>\u2060</span>';
-    let htmlString = element.innerHTML;
-    let array = Array.from(htmlString);
-    array.splice(index, 0, span);
-    let result = array.join('');
-    element.innerHTML = result;
-
-    let collection = element.querySelectorAll('span');
-    for (let element of collection) {
-        if (element.classList.length === 0) {
-            element.classList.add(className);
-        };
+    let span = document.createElement('span');
+    if (className) {
+        span.classList.add(className);
     }
+    span.textContent = '\u2060';
 
-    return result;
+    let text = element.childNodes[0];
+    text.splitText(index).before(span);
+
+    return span;
 }
 
 function removeSpan(element) {
@@ -607,6 +606,7 @@ function removeSpan(element) {
     for (let item of collection) {
         item.remove();
     }
+    element.normalize();
 }
 
 function getSpanCoordinates(element, className) {
@@ -617,14 +617,11 @@ function getSpanCoordinates(element, className) {
 
 function getLeftmostIndex() {
     let start;
-    let end;
 
     if (savedEnd >= savedStart) {
         start = savedStart;
-        end = savedEnd;
     } else {
         start = savedEnd;
-        end = savedStart;
     }
 
     return start;
@@ -636,9 +633,10 @@ function moveCaret(element) {
     insertSpan(element, getLeftmostIndex(), 'selection');
     let coords = getSpanCoordinates(element, '.selection');
     removeSpan(element);
-    insertSpan(element, element.textContent.length, 'end');
-    let defaultCoords = getSpanCoordinates(element, '.end');
-    removeSpan(element);
+
+    insertSpan(typedText, typedText.textContent.length, 'end');
+    let defaultCoords = getSpanCoordinates(typedText, '.end');
+    removeSpan(typedText);
 
 
     // Пока не знаю, стоит ли оставить
