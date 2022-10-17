@@ -28,13 +28,14 @@
 
 // ? - теряются обработчики после исполнения команды
 
-// не выделяются уже отправленные команды и строки
-// начал делать выделение других строк - перестало копироваться из них по Ctrl + C, т.к при нажатии C срабатывает window.onkeydown
-// не будет работать выделение на несколько строк - пока не знаю как поправить
-
-// сделать выделение в реальном времени
+// добавить разделение текущей команды и уже прописанных
+// сделать выделение по минимуму*
 // сделать цитаты по апишке
 
+
+// * на уже введенных командах - дефолтное
+// на инпуте - с анимацией, бг - прозрачный, текст-шадоу белый
+// если начинаешь выделять старые команды, то новую выделить нельзя, и наоборот
 
 
 
@@ -95,6 +96,7 @@ function removeLineBreaks(string) {
 // Ищем элементы
 let buddy = document.querySelector('body');
 
+let typedDone = document.querySelector('.done');
 let typedText = document.querySelector('.typed-text');
 typedText.innerHTML = removeLineBreaks(typedText.innerHTML);    // innerHTML меняет элементы внутри себя, поэтому все querySelector'ы, прописанные внутри данного элемента становятся недействительными((((
 
@@ -163,76 +165,36 @@ document.onmouseover = function(evt) {
 }
 
 document.onmousedown = function(evt) {
-    hoveredElementOnMouseDown = hoveredElement;
+    hoveredElementOnMouseDown = evt.target;
+    console.log(evt.target);
 
     if (!evt.shiftKey) {
+        if (evt.target === typedText) {
+            let collection = document.querySelectorAll('p:not(.typed-text)');
+            for (let item of collection) {
+                item.classList.add('no-select');
+            }
+        }
+        // if (evt.target !== typedText) {
+        //     typedText.classList.add('no-select');
+        // }
+    } else {
+        
+    }
+    
+
+
+    if (!evt.shiftKey && evt.button !== 2) {
         window.getSelection().removeAllRanges();
     } 
 
     if (evt.target.tagName !== 'P' && !evt.shiftKey) {
-        evt.preventDefault();
-        selectText(typedText, typedText.textContent.length, typedText.textContent.length)
+        selectText(typedText, typedText.textContent.length, typedText.textContent.length);
     }
-
-    // selectionTimer = setInterval(()=>{
-
-    //     // Всё то же, что при отпускании кнопки за исключением очистки таймера
-    //     if (window.getSelection().anchorOffset > window.getSelection().focusOffset) {
-    //         isReverse = true;
-    //     } else {
-    //         isReverse = false;
-    //     }
-
-    //     savedStart = window.getSelection().anchorOffset;
-    //     savedEnd = window.getSelection().focusOffset;
-
-    //     selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
-
-    //     moveCaret();
-    //     setWidth();
-    //     inputField.focus();
-
-
-    //     // Обратно возвращаем выделение
-    //     if (isReverse) {
-    //         selectTextReverse(typedText, inputField.selectionStart, inputField.selectionStart);
-
-    //         // Расширяем до тех пор пока не дойдет до позиции курсора
-    //         let coords = {
-    //             x: 1920
-    //         };
-    //         let coords2 = {
-    //             x: 1920
-    //         };
-    //         while (coords.x >= mouseX) {
-    //             savedRangeBefore = window.getSelection().getRangeAt(0);
-    //             window.getSelection().extend(typedText.firstChild, window.getSelection().focusOffset - 1);
-    //             inputField.selectionStart -= 1;
-    //             savedRangeAfter = window.getSelection().getRangeAt(0);
-
-    //             insertSpan(inputField.selectionStart, 'selection');
-    //             coords = getSpanCoordinates('.selection');
-    //             removeSpan();
-    //             insertSpan(inputField.selectionEnd, 'end');
-    //             coords2 = getSpanCoordinates('.end');
-    //             removeSpan();
-
-    //             window.getSelection().removeAllRanges
-    //             window.getSelection().addRange(savedRangeAfter);
-    //         }
-    //     } else {
-    //         selectText(typedText, inputField.selectionStart, inputField.selectionStart);
-    //     }
-
-        
-    // }, 150);
 }
 
-document.onmouseup = function () {
-    hoveredElementOnMouseUp = hoveredElement;
-    if (hoveredElementOnMouseUp.tagName !== 'P') {
-        hoveredElementOnMouseUp = typedText;
-    }
+document.onmouseup = function (evt) {
+    hoveredElementOnMouseUp = evt.target;
 
     if (window.getSelection().anchorOffset > window.getSelection().focusOffset) {
         isReverse = true;
@@ -243,24 +205,21 @@ document.onmouseup = function () {
     savedStart = window.getSelection().anchorOffset;
     savedEnd = window.getSelection().focusOffset;
 
-    // if (hoveredElementOnMouseDown !== hoveredElementOnMouseUp) {
-    //     console.log('ошибка');
-    // }
-
-    if (hoveredElementOnMouseUp === typedText) {
-        // selectInputText(window.getSelection().anchorOffset, window.getSelection().focusOffset);
-
-        moveCaret(hoveredElementOnMouseUp);
-        // setWidth(hoveredElementOnMouseUp);
-        // inputField.focus();
-    } else {
-        moveCaret(hoveredElementOnMouseUp);
-        // setWidth(hoveredElementOnMouseUp);
+    if (window.getSelection().focusNode === cursor) {
+        let lastP = window.getSelection().focusNode.previousSibling.previousSibling;
+        window.getSelection().extend(lastP.childNodes[0], lastP.textContent.length);
     }
-    
 
-    // clearInterval(selectionTimer);
-}
+    let collection = document.querySelectorAll('p');
+    for (let item of collection) {
+        item.classList.remove('no-select');
+    }
+
+    if (window.getSelection().anchorNode.parentElement === typedText) {
+        moveCaret(typedText);
+        setWidth(typedText);
+    }
+ }
 
 inputField.oninput = function () {
     typedText.textContent = inputField.value;
@@ -311,25 +270,26 @@ let lastEntered = {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Функционал Backspace, CTRL + Backspace, Enter, ArrowUp, доп. команды
 
-let ctrlPressed = false;
 
+// setTimeout тут нужен для того, чтобы результат команды появлялся позже, чем сама команда в независимости от положения renderCommandResult в коде
 function renderCommandResult(text) {
-    let commandResultText = text;
+    setTimeout(() => {
     let commandResult = document.createElement('p');
+    let lastP = document.querySelector('p:nth-last-of-type(2)');
 
     commandResult.classList.add('command-result');
-    commandResult.textContent = commandResultText;
-    typedText.after(commandResult);
-    commandResult.after(document.createElement('br'));
+    commandResult.textContent = text + '\n';
+    lastP.after(commandResult);
+    // commandResult.after(document.createElement('br'));
+    });
     return
 }
 
 window.onkeydown = function (evt) {
-    if (evt.key === 'k') {
-        evt.preventDefault();
-        console.log(hoveredElement.tagName);
-        return
-    }
+    // if (evt.key === 'k') {
+    //     evt.preventDefault();
+    //     return
+    // }
     if (
         evt.key !== 'Shift' &&
         evt.key !== 'Control' &&
@@ -348,11 +308,8 @@ window.onkeydown = function (evt) {
     if (evt.key == 'Delete') {
         cursor.classList.add('cursor-only-opacity');
     }
-    if (evt.key == 'Control') {
-        ctrlPressed = true;
-    }
 
-    if (evt.key == 'Backspace' && ctrlPressed === true) {
+    if (evt.key == 'Backspace' && evt.ctrlKey) {
         typedText.textContent = '';
         inputField.value = typedText.textContent;
     }
@@ -419,21 +376,28 @@ window.onkeydown = function (evt) {
         // Записываем последнее значение в массив, переходим на новую строку, убираем класс, добавляем новую p'шку, и присваиваем ее в переменную typedText
         lastEntered.pushMax10();
 
-        typedText.textContent += '\n';
-        if (typedText.className === 'typed-text') {
-            typedText.removeAttribute('class');
-        } else {
-            typedText.classList.remove('typed-text');
-        }
-
         let newP = document.createElement('p');
-        newP.classList.add('typed-text');
-        cursor.before(newP);
+        newP.textContent = typedText.textContent + '\n';
+        typedDone.appendChild(newP);
 
-        typedText = newP;
+        // typedText.textContent += '\n';
+        // if (typedText.className === 'typed-text') {
+        //     typedText.removeAttribute('class');
+        // } else {
+        //     typedText.classList.remove('typed-text');
+        // }
 
-        //Обнуляем поле ввода
+        // let newP = document.createElement('p');
+        // newP.classList.add('typed-text');
+        // cursor.before(newP);
+
+        // typedText = newP;
+
+        //Обнуляем поле ввода и текст в пишке
         inputField.value = '';
+        setTimeout(() => {
+            triggerInputEvent();
+        });
 
         // Обнуляем позицию счетчика последних введенных значений
         lastEntered.position = -1;
@@ -446,11 +410,6 @@ window.onkeydown = function (evt) {
     }
 };
 
-window.onkeyup = function (evt) {
-    if (evt.key == 'Control') {
-        ctrlPressed = false;
-    }
-};
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -552,7 +511,6 @@ function typeQuote() {
     let listenerArray = [window.onkeydown]                      // в старой версии было несколько значений. пока оставил как массив
     window.onkeydown = null;
     inputField.setAttribute('readonly', '');
-    ctrlPressed = false;
 
     function type() {
         inputField.value += letter.getSetNext();
@@ -585,8 +543,6 @@ function typeQuote() {
 
 
 
-
-// Возможно надо будет поменять на пограничных случаях, когда не получится разделить текст
 
 function insertSpan(element, index, className) {
     let span = document.createElement('span');
@@ -676,10 +632,10 @@ function computeWidth(element) {
     return result;
 }
 
-function setWidth() {
-    cursor.style.width = computeWidth();
+function setWidth(element) {
+    cursor.style.width = computeWidth(element);
 
-    if (savedEnd === savedStart) {
+    if (savedEnd !== savedStart) {
         cursor.classList.add('cursor-frame');
     } else {
         cursor.classList.remove('cursor-frame');
@@ -693,3 +649,10 @@ function setWidth() {
 // document.onkeydown = null;
 // document.onmousedown = null;
 // document.onmouseup = null;
+
+
+
+// setInterval(() => {
+//     moveCaret(typedText);
+//     setWidth(typedText);
+// }, 300);
