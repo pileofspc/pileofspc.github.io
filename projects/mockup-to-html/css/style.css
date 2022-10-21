@@ -141,18 +141,6 @@
     background-color: rgb(13, 25, 37);
 }
 
-/* .gradient {
-    content: '';
-    position: absolute;
-
-    right: 0;
-    top: 0;
-
-    width: 400px;
-    height: 663px;
-    background: linear-gradient(to right, transparent, rgb(13, 25, 37)) 94% top / 50px no-repeat, ;
-} */
-
 .page__main {
 
 }
