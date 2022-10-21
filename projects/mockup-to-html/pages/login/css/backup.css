@@ -1,0 +1,31 @@
+.header__inner {
+    /* margin-left: 40px;
+    margin-top: 24px; */
+    margin-top: 2.56vh;
+    margin-left: 2.1vw;
+
+    width: fit-content;
+}
+
+.header__logo {
+    height: 2.8646vh;
+}
+
+.header__title {
+    font-size: min(22.5px, calc(1.172vw * var(--maxscale)));
+
+    margin-right: min(49px, calc(2.552vw * var(--maxscale)));
+
+    transform: translateY(calc(-1 * min(2px, calc(0.10417vw * var(--maxscale)))));
+}
+
+.header__description {
+    font-size: min(12px, calc(0.625vw * var(--maxscale)));
+    min-width: calc(15vw * var(--maxscale));
+}
+
+.header__description::before {
+    left: calc(-1 * min(25px, calc(1.302vw * var(--maxscale))));
+    width: min(1px, calc(0.05208vw * var(--maxscale)));
+    height: min(16px, calc(0.833333vw * var(--maxscale)));
+}

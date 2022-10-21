@@ -10,8 +10,8 @@
     <link href="css/style.css" rel="stylesheet">
   </head>
   <body class="page">
-    <div class="page__splash"></div>
-    <header class="header header_color_transparent header_only-logo">
+    
+    <header class="header header_color_transparent">
       <div class="container header__inner">
         <div class="header__logo">
           <a class="link title header__title" href="#">Company<span class="title_text-color_red">Name</span></a>
@@ -33,7 +33,20 @@
 
     <main class="main page__main">
       <div class="container main__inner">
-        
+        <img class="login-splash" src="../../images/login_signup/login-splash.jpg"></img>
+        <form class="login-form page__login-form" method="post">
+          <h1 class="form-h1 login-form__h1">Войти в Company<span class="title_text-color_red">Name</span></h1>
+          <h2 class="login-form__h2">Заполните данные для входа в систему</h2>
+          <input type="email" class="input-text login-form__input-text" placeholder="Email" name="email">
+          <input type="password" class="input-text login-form__input-text" placeholder="Пароль" name="password">
+          <a href="#" class="link login-form__link login-form__forgot">Забыли пароль?</a>
+          <input type="submit" class="submit login-form__submit" value="Войти">
+          <label class="login-form__remember">
+            <input type="checkbox" name="remember">
+            Запомнить меня
+          </label>
+          <span class="login-form__register">У вас нет аккаунта? <a href="#" class="link login-form__link">Зарегистрироваться</a></span>          
+        </form>
       </div>
     </main>
     

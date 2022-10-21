@@ -237,7 +237,7 @@
     justify-content: space-between;
     align-items: center;
 
-    font-family: 'Manrope';
+    font-family: 'Manrope', sans-serif;
     font-weight: 600;
     font-size: 14px;
 
@@ -310,7 +310,7 @@
 .intro__text {
     width: 560px;
 
-    font-family: Manrope, sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 500;
     font-size: 16px;
 
@@ -553,7 +553,7 @@
 }
 
 .ad-card__h3 {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-weight: 700;
     font-size: 22px;
     line-height: 26px;
@@ -565,7 +565,7 @@
 }
 
 .ad-card__text {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
@@ -653,7 +653,7 @@
 }
 
 .con__who {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.18em;
@@ -667,7 +667,7 @@
 }
 
 .con__h2 {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 34px;
     font-weight: 700;
     line-height: 35px;
@@ -677,7 +677,7 @@
 }
 
 .con__text {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
@@ -689,7 +689,7 @@
 }
 
 .con__bulletpoint-list-item {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
@@ -763,7 +763,7 @@
 }
 
 .transfer__h2 {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 26px;
     font-weight: 700;
     line-height: 25px;
@@ -775,7 +775,7 @@
 }
 
 .transfer__text {
-    font-family: 'Google Sans';
+    font-family: 'Google Sans', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 22px;
