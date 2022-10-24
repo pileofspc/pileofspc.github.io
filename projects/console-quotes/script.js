@@ -18,7 +18,6 @@
 // v - сделать перемещение по клику
 // v - снимать выделение при клике вне текста
 // v - при замене выделенного текста на другой текст курсор прыгает на начало
-
 // v - если начинать выделять справа  налево, начиная с пустого места после текста, то ничего не выделяется
 // v - не работает shift-click, ctrl-click. Двойной клик работает, случайно так получилось BloodTrail
 // v - надо либо не использовать moveCaret, либо как-то написать selectText так, чтобы он выделял с конца в начало
@@ -27,16 +26,27 @@
 // v - при шифт клике в anchor не происходит анимации
 // v - теряются обработчики после исполнения команды
 // v - добавить разделение текущей команды и уже прописанных
-
-// сделать выделение по минимуму*
+// v - сделать линию раздела невидимой в начале и вообще покрасивее
+// v - сделать выделение по минимуму*
     // * на уже введенных командах - дефолтное
     // на инпуте - с анимацией, бг - прозрачный, текст-шадоу белый
     // если начинаешь выделять старые команды, то новую выделить нельзя, и наоборот
-// сделать линию раздела невидимой в начале и вообще покрасивее
-// выделение на несколько строк не работает
-// при выделении введенных команд либо убирать курсор в конец, либо сделать функционал, чтобы текст вводился туда, где стоит курсор
 // при нажатии ctrl + c сбрасывается выделение
+// v - Сделать нормальный шифт клик
+    // Пока оставил как есть, т.к. не знаю как сделать, чтобы не прерывалось выделение при клике mousedown, пояснения ниже в коде.
+
+
+
+    
+// при выделении введенных команд либо убирать курсор в конец, либо сделать функционал, чтобы текст вводился туда, где стоит курсор
+// ? - выделяется текст внизу под вводимой командой
+
+// выделение на несколько строк не работает
 // проверить функции type и quote
+// выскакивает ошибка при первом клике, когда еще ничего не введено
+// при нажатии на кнопки клавиатуры ошибка
+
+
 
 // сделать цитаты по апишке
 
@@ -57,8 +67,7 @@
 //      Все больше убеждаюсь, что это была ошибка...
 // 2 - Для устранения пробелов используется функция, хотя наверное можно было бы сделать через CSS.
 // 3 - Структура кода не приведена в порядок, потому что пока нет понимания как лучше ее выстраивать.
-// 4 - Много где используется setTimeout по причине того, что что-то либо не успевает выполняться, либо выполняется раньше, чем нужно, и либо я пока не знаю как это исправить, либо мне лень.
-// 5 - Хотелось бы уйти от использования innerHTML, но пока не знаю как. Не знаю как вставить элемент после определенного символа текста без innerHTML.
+// 4 - Много где используется setTimeout (часто без указания времени задержки, но кое-где и с ней) по причине того, что что-то либо не успевает выполняться, либо выполняется раньше, чем нужно. Пока не знаю как это исправить, или мне лень.
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,8 +183,8 @@ document.onmouseover = function(evt) {
 document.onmousedown = function(evt) {
     hoveredElementOnMouseDown = evt.target;
 
-    // Простой клик
     if (!evt.shiftKey) {
+        // Простой клик
         if (evt.target === typedDone || evt.target.parentElement === typedDone) {
             typedText.classList.add('no-select');
         } else {
@@ -183,7 +192,23 @@ document.onmousedown = function(evt) {
         }
     } else {
         // Шифт + клик
-        
+        if (window.getSelection().anchorNode.parentElement.parentElement === typedDone || window.getSelection().anchorNode.parentElement === typedDone) {
+            typedText.classList.add('no-select');
+        } else {
+            typedDone.classList.add('no-select');
+        }
+        // При шифт-клике на противоположную сторону выделяет до конца/начала текущей стороны, но при этом сбрасывается действие дефолтного выделения,
+        // т.е нельзя больше двигать мышью при нажатой кнопке, чтобы выбрать конец выделения - он уже как бы выбран кодом ниже, как будто кнопка уже была отпущена
+
+        // if ((evt.target.classList.contains('no-select') || evt.target.parentElement.classList.contains('no-select')) &&
+        // (evt.target === typedDone || evt.target.parentElement === typedDone)) {
+        //     let currentNode = typedText.childNodes[0];
+        //     window.getSelection().extend(currentNode, 0);
+        // }
+        // if (evt.target.classList.contains('no-select') && evt.target === typedText) {
+        //     let currentNode = typedDone.querySelector('p:last-child').childNodes[0];
+        //     window.getSelection().extend(currentNode, currentNode.length);
+        // }
     }
     if (!evt.shiftKey && evt.button !== 2) {
         window.getSelection().removeAllRanges();
@@ -281,10 +306,13 @@ function renderCommandResult(text) {
 }
 
 window.onkeydown = function (evt) {
-    // if (evt.key === 'k') {
-    //     evt.preventDefault();
+    // if (evt.code == 'KeyC') {
+    //     console.log(evt);
     //     return
     // }
+    if (evt.code == 'KeyC' && evt.ctrlKey) {
+        return
+    }
     if (
         evt.key !== 'Shift' &&
         evt.key !== 'Control' &&
@@ -297,9 +325,7 @@ window.onkeydown = function (evt) {
         inputField.focus();
         cursor.classList.add('cursor-only-opacity');
     }
-    // if (inputField.selectionEnd - inputField.selectionStart !== 0) {
-        // cursor.classList.add('cursor-only-opacity');
-    // }
+
     if (evt.key == 'Delete') {
         cursor.classList.add('cursor-only-opacity');
     }
@@ -325,6 +351,7 @@ window.onkeydown = function (evt) {
     // DANGER ZONE!!! DANGER DANGER DANGER USER DEFINED CODE EXECUTION IS IMMINENT!!!
 
     if (evt.key === 'Enter') {
+        typedText.classList.add('add-line');
         if (typedText.textContent === 'help') {
             renderCommandResult(
                 'run (js command) - выполнить любую команду JavaScript и вывести результат в качестве строки\n' +

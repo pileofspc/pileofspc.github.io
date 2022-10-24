@@ -50,15 +50,27 @@ p {
   user-select: text;
 }
 
+.done p {
+  display: block;
+  margin-bottom: 20px;
+}
+
 .typed-text {
   user-select: text;
 }
 
-.typed-text::before {
+.typed-text::selection {
+  visibility: hidden;
+  text-shadow: 0 0 15px white;
+}
+
+.add-line::before {
   content: '';
   position: absolute;
-  width: 95vw;
+  width: 98vw;
   height: 2px;
+
+  transform: translate(0, -8px);
 
   background-color: #fff;
 }
