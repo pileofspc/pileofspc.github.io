@@ -29,6 +29,8 @@ body {
   
   padding-left: 10px;
   padding-right: 25px;
+
+  user-select: none;
 }
 
 p {
@@ -39,8 +41,42 @@ p {
   word-wrap: break-word;
 }
 
+.done {
+  width: 110%;
+  transform: translateX(-20px);
+  padding-left: 20px;
+  padding-right: 25px;
+
+  user-select: text;
+}
+
+.done p {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.typed-text {
+  user-select: text;
+}
+
+.typed-text::selection {
+  visibility: hidden;
+  text-shadow: 0 0 15px white;
+}
+
+.add-line::before {
+  content: '';
+  position: absolute;
+  width: 98vw;
+  height: 2px;
+
+  transform: translate(0, -8px);
+
+  background-color: #fff;
+}
+
 .command-result {
-  display: inline-block;
+  display: inline;
   margin-left: 70px;
 
   color: white;
@@ -69,6 +105,8 @@ p {
   height: 40px;
 
   outline: 2px solid transparent;
+
+  user-select: none;
 }
 
 .cursor-only-opacity {
@@ -89,6 +127,10 @@ p {
   outline-color: cyan;
 
   transition: opacity 0.1s linear, width 0.05s linear, transform 0.05s linear, top 0.05s linear, outline 0.05s linear;
+}
+
+.nbsp {
+  user-select: none;
 }
 
 /* С телефона нельзя выставлять width: 0; т.к тогда ПОЧЕМУ-ТО инпут обрезается до последнего слова
@@ -120,7 +162,11 @@ input[type = "text"]:active {
   outline: none;
 }
 
-*::selection {
+/* *::selection {
   visibility: hidden;
   text-shadow:  0 0 14px white;
+} */
+
+.no-select {
+  user-select: none;
 }
