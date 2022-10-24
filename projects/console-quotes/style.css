@@ -29,6 +29,8 @@ body {
   
   padding-left: 10px;
   padding-right: 25px;
+
+  user-select: none;
 }
 
 p {
@@ -37,6 +39,19 @@ p {
 
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.done {
+  width: 110%;
+  transform: translateX(-20px);
+  padding-left: 20px;
+  padding-right: 25px;
+
+  user-select: text;
+}
+
+.typed-text {
+  user-select: text;
 }
 
 .typed-text::before {
@@ -78,6 +93,8 @@ p {
   height: 40px;
 
   outline: 2px solid transparent;
+
+  user-select: none;
 }
 
 .cursor-only-opacity {

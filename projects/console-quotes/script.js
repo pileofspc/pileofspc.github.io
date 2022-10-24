@@ -25,17 +25,24 @@
 // v - допилить функционал выделения
 // v - доделать оформление выделения
 // v - при шифт клике в anchor не происходит анимации
+// v - теряются обработчики после исполнения команды
+// v - добавить разделение текущей команды и уже прописанных
 
-// ? - теряются обработчики после исполнения команды
-
-// добавить разделение текущей команды и уже прописанных
 // сделать выделение по минимуму*
+    // * на уже введенных командах - дефолтное
+    // на инпуте - с анимацией, бг - прозрачный, текст-шадоу белый
+    // если начинаешь выделять старые команды, то новую выделить нельзя, и наоборот
+// сделать линию раздела невидимой в начале и вообще покрасивее
+// выделение на несколько строк не работает
+// при выделении введенных команд либо убирать курсор в конец, либо сделать функционал, чтобы текст вводился туда, где стоит курсор
+// при нажатии ctrl + c сбрасывается выделение
+// проверить функции type и quote
+
 // сделать цитаты по апишке
 
 
-// * на уже введенных командах - дефолтное
-// на инпуте - с анимацией, бг - прозрачный, текст-шадоу белый
-// если начинаешь выделять старые команды, то новую выделить нельзя, и наоборот
+
+
 
 
 
@@ -166,24 +173,18 @@ document.onmouseover = function(evt) {
 
 document.onmousedown = function(evt) {
     hoveredElementOnMouseDown = evt.target;
-    console.log(evt.target);
 
+    // Простой клик
     if (!evt.shiftKey) {
-        if (evt.target === typedText) {
-            let collection = document.querySelectorAll('p:not(.typed-text)');
-            for (let item of collection) {
-                item.classList.add('no-select');
-            }
+        if (evt.target === typedDone || evt.target.parentElement === typedDone) {
+            typedText.classList.add('no-select');
+        } else {
+            typedDone.classList.add('no-select');
         }
-        // if (evt.target !== typedText) {
-        //     typedText.classList.add('no-select');
-        // }
     } else {
+        // Шифт + клик
         
     }
-    
-
-
     if (!evt.shiftKey && evt.button !== 2) {
         window.getSelection().removeAllRanges();
     } 
@@ -205,15 +206,11 @@ document.onmouseup = function (evt) {
     savedStart = window.getSelection().anchorOffset;
     savedEnd = window.getSelection().focusOffset;
 
-    if (window.getSelection().focusNode === cursor) {
-        let lastP = window.getSelection().focusNode.previousSibling.previousSibling;
-        window.getSelection().extend(lastP.childNodes[0], lastP.textContent.length);
-    }
-
     let collection = document.querySelectorAll('p');
     for (let item of collection) {
         item.classList.remove('no-select');
     }
+    typedDone.classList.remove('no-select')
 
     if (window.getSelection().anchorNode.parentElement === typedText) {
         moveCaret(typedText);
@@ -275,12 +272,10 @@ let lastEntered = {
 function renderCommandResult(text) {
     setTimeout(() => {
     let commandResult = document.createElement('p');
-    let lastP = document.querySelector('p:nth-last-of-type(2)');
-
+ 
     commandResult.classList.add('command-result');
     commandResult.textContent = text + '\n';
-    lastP.after(commandResult);
-    // commandResult.after(document.createElement('br'));
+    typedDone.appendChild(commandResult);
     });
     return
 }
