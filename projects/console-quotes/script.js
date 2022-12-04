@@ -18,8 +18,264 @@ let inputField = document.querySelector('.input-field');
 // Добавляем обработчики и передаем фокус на элемент ввода
 inputField.focus();
 
-let savedStart = 0;
-let savedEnd = 0;
+// let savedStart = 0;
+// let savedEnd = 0;
+
+// Контроль каретки
+
+let caret = new class Caret {
+    constructor() {
+        this.savedStart = 0;
+        this.savedEnd = 0;
+    }
+
+    insertSpan(element, index, className) {
+        let span = document.createElement('span');
+        if (className) {
+            span.classList.add(className);
+        }
+        span.textContent = '\u2060';
+    
+        let text = element.childNodes[0];
+        text.splitText(index).before(span);
+    
+        return span;
+    }
+    removeSpan(element) {
+        let collection = element.querySelectorAll('span');
+        for (let item of collection) {
+            item.remove();
+        }
+        element.normalize();
+    }
+    getSpanCoordinates(element, className) {
+        let span = element.querySelector(className);
+        let rect = span.getBoundingClientRect();
+        return rect
+    }
+    getPositionSorted(index) {
+        let start;
+        let end;
+        if (this.savedEnd >= this.savedStart) {
+            start = this.savedStart;
+            end = this.savedEnd;
+        } else {
+            start = this.savedEnd;
+            end = this.savedStart;
+        }
+        if (index !== undefined) {
+            return [start, end][index];
+        } else {
+            return [start, end];
+        }
+    }
+    move(element) {
+        let coords;
+        let defaultCoords;
+    
+        this.insertSpan(element, this.getPositionSorted(0), 'selection');
+        coords = this.getSpanCoordinates(element, '.selection');
+        this.removeSpan(element);
+    
+        this.insertSpan(typedText, typedText.textContent.length, 'end');
+        defaultCoords = this.getSpanCoordinates(typedText, '.end');
+        this.removeSpan(typedText);
+        
+    
+        // Пока не знаю, стоит ли оставить
+    
+        // if (coords.y + 'px' !== cursor.style.top) {
+        //     cursor.classList.add('cursor-only-opacity');
+        // };
+    
+        cursor.style.transform = `translateX(${coords.x - defaultCoords.x - 10.5}px)`;
+        cursor.style.top = coords.y + window.scrollY +'px';
+        if (this.savedStart === this.savedEnd && this.savedEnd === element.textContent.length) {
+            cursor.classList.remove('cursor-line');
+            cursor.style.transform = 'translateX(0)'
+        } else {
+            cursor.classList.add('cursor-line');
+        }
+    
+        // ТУТ НУЖНО РАЗОБРАТЬСЯ, ТАЙМАУТ НЕ МОМЕНТАЛЬНЫЙ
+        setTimeout(() => {
+                cursor.classList.remove('cursor-only-opacity');
+        }, 10);
+    }
+    computeWidth(element) {
+        this.insertSpan(element, this.savedStart, 'selection');
+        let coords1 = this.getSpanCoordinates(element, '.selection');
+        this.removeSpan(element);
+        this.insertSpan(element, this.savedEnd, 'end');
+        let coords2 = this.getSpanCoordinates(element, '.end');
+        this.removeSpan(element);
+    
+        return Math.abs(coords2.x - coords1.x) + 'px';
+    }
+    setWidth(element) {
+        cursor.style.width = this.computeWidth(element);
+    
+        if (this.savedEnd !== this.savedStart) {
+            cursor.classList.add('cursor-frame');
+        } else {
+            cursor.classList.remove('cursor-frame');
+            cursor.style.width = '';
+        }
+    }
+    reset() {
+        cursor.style = '';
+        cursor.setAttribute('class', 'cursor');
+        this.savedStart = this.savedEnd = inputField.selectionStart = inputField.value.length;
+    }
+}
+
+// Функционал последних введенных команд
+let lastEntered = new class LastEntered {
+    constructor() {
+        this.array = [];
+        this.position = -1;
+    }
+    
+    pushMax10() {
+        if (this.array.length < 10) {
+            this.array.push(typedText.textContent);
+        } else {
+            this.array.shift();
+            this.array.push(typedText.textContent);
+        }
+    }
+    get() {
+        let lastIndex = this.array.length - 1;
+        let currentIndex = lastIndex - this.position;
+        return this.array[currentIndex];
+    }
+    setPrevious() {
+        if (this.position < this.array.length - 1) this.position++
+    }
+    setNext() {
+        if (this.position > -1) this.position--
+    }
+    getSetPrevious() {
+        this.setPrevious();
+        return this.get();
+    }
+    getSetNext() { 
+        this.setNext();
+        return this.get();
+    }
+};
+
+// Вывод рандомной цитаты
+// Рандомное число в диапазоне - взято с MDN https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;       //Максимум не включается, минимум включается
+}
+
+let quotes = new class Quotes {
+    constructor() {
+        this.timer = '';
+        this.quotes = [
+            'Падение - это не провал. Провал это Провал. Падение - это где упал.',
+            'Не важно у кого день рождения. Важно у кого день рождения кого.',
+            'Лучше один раз упасть, чем сто раз упасть.',
+            'Каждый думает, что знает меня, но не каждый знает, что не знает, кто думает.',
+            'Как бы сейчас не было сейчас. Все будет было.',
+            'Не слушай тех, кто много обещает. Они обычно много обещают.',
+            'Волк слабее санитара, но в дурке он не работает.',
+            'Никогда не поздно, никогда не рано - поменять все поздно, если это рано.',
+        ];
+        this.quote = '';
+        this.i = 0;
+        this.done = false;
+    }
+
+    getRandomQuote() {
+        return this.quotes[getRandomInt(0, this.quotes.length)];
+    }
+    setRandomQuote() {
+        this.quote = this.quotes[getRandomInt(0, this.quotes.length)];
+        return this.quote
+    }
+    getLetter() {
+        return this.quote[this.i]
+    }
+    incrementI() {
+        this.i++;
+    }
+    reset() {
+        this.quote = '';
+        this.i = 0;
+        this.done = false;
+    }
+    letter() {
+        if (this.done) {
+            this.reset();
+        }
+        if (this.quote === '') {
+            this.setRandomQuote();
+        }
+
+        let result = this.getLetter();
+        this.incrementI();
+        if (this.getLetter() === undefined) {
+            this.done = true;
+        }
+        return result;
+    }
+    typeLetter() {
+        inputField.value += this.letter();
+        handlers.triggerInputEvent();
+        this.timer = setTimeout(()=>{this.typeLetter()}, 50);
+        if (this.done) {
+            clearTimeout(this.timer);
+            handlers.unblock();
+        }
+    }
+    type() {
+        handlers.saveBlock();
+        setTimeout(()=>{this.typeLetter()}, 200);
+    }
+
+};
+
+// Действия с обработчиками и ивентами
+let handlers = new class Handlers{
+    constructor() {
+        this.listenerArray = [];
+    }
+    
+    save() {
+        this.listenerArray = [document.onkeydown, document.onmousedown, document.onmouseup, form.onsubmit];
+    }
+    block() {
+        document.onkeydown = null;
+        document.onmousedown = null;
+        document.onmouseup = null;
+        form.onsubmit = function(evt) {
+            evt.preventDefault()
+            return
+        };
+        inputField.setAttribute('readonly', '');
+    }
+    saveBlock() {
+        this.save();
+        this.block();
+    }
+    unblock() {
+        document.onkeydown = this.listenerArray[0];
+        document.onmousedown = this.listenerArray[1];
+        document.onmouseup = this.listenerArray[2];
+        form.onsubmit = this.listenerArray[3];
+        inputField.removeAttribute('readonly');
+    }
+    triggerInputEvent() {
+        inputField.dispatchEvent(
+            new Event('input', {bubbles:true})
+            );
+    }
+};
 
 // Ивенты мыши
 document.onmousedown = function(evt) {
@@ -66,19 +322,18 @@ document.onmouseup = function (evt) {
     if (window.getSelection().anchorNode) {
         if (window.getSelection().anchorNode.parentElement === typedText || window.getSelection().anchorNode === document.body) {
         
-
-            savedStart = window.getSelection().anchorOffset;
-            savedEnd = window.getSelection().focusOffset;
+            caret.savedStart = window.getSelection().anchorOffset;
+            caret.savedEnd = window.getSelection().focusOffset;
             if (window.getSelection().anchorNode === document.body) {
-            savedStart = typedText.textContent.length;
+                caret.savedStart = typedText.textContent.length;
             }
             if (window.getSelection().focusNode === document.body) {
-            savedEnd = typedText.textContent.length;
+                caret.savedEnd = typedText.textContent.length;
             }
     
             if (typedText.textContent) {
-                moveCaret(typedText);
-                setWidth(typedText);
+                caret.move(typedText);
+                caret.setWidth(typedText);
             }
         }
     }
@@ -99,33 +354,29 @@ document.onkeydown = function (evt) {
     if (evt.code == 'KeyC' && evt.ctrlKey) {
             return
     }
-
     if (evt.key == 'Delete') {
         cursor.classList.add('cursor-only-opacity');
     }
-
     if (evt.key == 'Backspace' && evt.ctrlKey) {
         typedText.textContent = '';
         inputField.value = typedText.textContent;
     }
-
     if (evt.key === 'ArrowLeft' || evt.key === 'ArrowRight') {
         setTimeout(() => {
-            triggerInputEvent();
+            handlers.triggerInputEvent();
         });
     }
-
     if (evt.key === 'ArrowUp') {
         evt.preventDefault();                                        // evt.preventDefault(); здесь нужен, т.к при нажатии ArrowUp по умолчанию каретка в input уходит в начало, что нам не нужно
         typedText.textContent = lastEntered.getSetPrevious();
         inputField.value = typedText.textContent;
 
         setTimeout(() => {
-            triggerInputEvent();
+            handlers.triggerInputEvent();
         });
 
         // ДОБАВИТЬ СЮДА УСЛОВИЕ, чтобы на последней команде не сбрасывалось
-        resetCaret();
+        caret.reset();
     }
     if (evt.key === 'ArrowDown') {
         evt.preventDefault();                                       // здесь необязательно вроде бы, но добавил для унификации
@@ -133,13 +384,12 @@ document.onkeydown = function (evt) {
         inputField.value = typedText.textContent;
 
         setTimeout(() => {
-            triggerInputEvent();
+            handlers.triggerInputEvent();
         });
 
         // ДОБАВИТЬ СЮДА УСЛОВИЕ, чтобы на последней команде не сбрасывалось
-        resetCaret();
+        caret.reset();
     }
-
     if (evt.key !== 'Shift' &&
         evt.key !== 'Control' &&
         evt.key !== 'Alt' &&
@@ -149,10 +399,9 @@ document.onkeydown = function (evt) {
             inputField.focus();
             cursor.classList.add('cursor-only-opacity');
     }
-
     if (evt.key !== 'Shift' && evt.key !== 'Control' && evt.key !== 'Alt' && evt.key !== 'CapsLock') {
-        inputField.selectionStart = getPositionSorted(0);
-        inputField.selectionEnd = getPositionSorted(1);
+        inputField.selectionStart = caret.getPositionSorted(0);
+        inputField.selectionEnd = caret.getPositionSorted(1);
     }
 }
 inputField.oninput = function () {
@@ -160,14 +409,25 @@ inputField.oninput = function () {
     window.scroll(0, document.body.clientHeight);
 
     // После того, как в инпут попадает буква или в нем перемещается курсор - возвращаем новое положение курсора в переменные и двигаем по ним каретку
-    savedStart = inputField.selectionStart;
-    savedEnd = inputField.selectionEnd;
+    caret.savedStart = inputField.selectionStart;
+    caret.savedEnd = inputField.selectionEnd;
     if (typedText.textContent) {
-        moveCaret(typedText);
-        setWidth(typedText);
+        caret.move(typedText);
+        caret.setWidth(typedText);
     }
     
 };
+
+// setTimeout тут нужен для того, чтобы результат команды появлялся позже, чем сама команда в независимости от положения renderCommandResult в коде
+function renderCommandResult(text) {
+    setTimeout(() => {
+    let commandResult = document.createElement('p');
+ 
+    commandResult.classList.add('command-result');
+    commandResult.textContent = text + '\n';
+    done.appendChild(commandResult);
+    });
+}
 form.onsubmit = function(evt) {
     evt.preventDefault();
 
@@ -186,20 +446,17 @@ form.onsubmit = function(evt) {
             'exit - вернуться на главную страницу\n' +
             '\n' +
             'Arrow Up, Arrow Down - листать список предыдущих команд назад и вперед соответственно\n' +
-            'Ctrl + Backspace - удалить всю строку\n'
+            'Ctrl + Backspace - удалить всю строку'
         );
     }
-
     if (typedText.textContent === 'type') {
-        typeQuote();
+        quotes.type();
     }
-
     // если строка начинается с 'run ', то выполняем команду и выдаем результат в качестве пишки с классом run-result, если нет, то просто продолжаем выполнение блока, т.е записываем просто текстом
     if (typedText.textContent.slice(0, 4) === 'run ') {
         let command = String(Function('return ' + typedText.textContent.slice(4))());
         renderCommandResult(command);
     }
-
     //  если строка равна clear убираем все пишки
     if (typedText.textContent === 'clear') {
         let pTags = document.querySelectorAll('p');
@@ -215,7 +472,7 @@ form.onsubmit = function(evt) {
         window.open('https://pileofspc.github.io/', '_self', "noreferrer, noopener")
     }
     if (typedText.textContent === 'quote') {
-        renderCommandResult(getQuote());
+        renderCommandResult(quotes.getRandomQuote());
     }
 
 
@@ -233,23 +490,11 @@ form.onsubmit = function(evt) {
     // Обнуляем позицию счетчика последних введенных значений
     lastEntered.position = -1;
 
-    resetCaret();
+    caret.reset();
     setTimeout(() => {
         window.scroll(0, document.body.clientHeight);
     });
 }
-
-// setTimeout тут нужен для того, чтобы результат команды появлялся позже, чем сама команда в независимости от положения renderCommandResult в коде
-function renderCommandResult(text) {
-    setTimeout(() => {
-    let commandResult = document.createElement('p');
- 
-    commandResult.classList.add('command-result');
-    commandResult.textContent = text + '\n';
-    done.appendChild(commandResult);
-    });
-}
-
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -283,267 +528,7 @@ let animation = new class Animation {
     };
     stop() {
         clearTimeout(this.timer);
-        clearTimeout(this.timer);
         cursor.style.opacity = '100%';
     };
 }
 animation.start();
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function triggerInputEvent() {
-    inputField.dispatchEvent(
-        new Event('input', {bubbles:true})
-        );
-}
-
-// Контроль каретки
-function insertSpan(element, index, className) {
-    let span = document.createElement('span');
-    if (className) {
-        span.classList.add(className);
-    }
-    span.textContent = '\u2060';
-
-    let text = element.childNodes[0];
-    text.splitText(index).before(span);
-
-    return span;
-}
-
-function removeSpan(element) {
-    let collection = element.querySelectorAll('span');
-    for (let item of collection) {
-        item.remove();
-    }
-    element.normalize();
-}
-
-function getSpanCoordinates(element, className) {
-    let span = element.querySelector(className);
-    let rect = span.getBoundingClientRect();
-    return rect
-}
-
-function getPositionSorted(index) {
-    let start;
-    let end;
-
-    if (savedEnd >= savedStart) {
-        start = savedStart;
-        end = savedEnd;
-    } else {
-        start = savedEnd;
-        end = savedStart;
-    }
-
-    return [start, end][index];
-}
-
-function moveCaret(element) {
-    let coords;
-    let defaultCoords;
-
-    insertSpan(element, getPositionSorted(0), 'selection');
-    coords = getSpanCoordinates(element, '.selection');
-    removeSpan(element);
-
-    insertSpan(typedText, typedText.textContent.length, 'end');
-    defaultCoords = getSpanCoordinates(typedText, '.end');
-    removeSpan(typedText);
-    
-
-    // Пока не знаю, стоит ли оставить
-
-    // if (coords.y + 'px' !== cursor.style.top) {
-    //     cursor.classList.add('cursor-only-opacity');
-    // };
-
-    cursor.style.transform = `translateX(${coords.x - defaultCoords.x - 10.5}px)`;
-    cursor.style.top = coords.y + window.scrollY +'px';
-    if (savedStart === savedEnd && savedEnd === element.textContent.length) {
-        cursor.classList.remove('cursor-line');
-        cursor.style.transform = 'translateX(0)'
-    } else {
-        cursor.classList.add('cursor-line');
-    }
-
-    // ТУТ НУЖНО РАЗОБРАТЬСЯ, ТАЙМАУТ НЕ МОМЕНТАЛЬНЫЙ
-    setTimeout(() => {
-            cursor.classList.remove('cursor-only-opacity');
-    }, 10);
-}
-
-function computeWidth(element) {
-    insertSpan(element, savedStart, 'selection');
-    let coords1 = getSpanCoordinates(element, '.selection');
-    removeSpan(element);
-    insertSpan(element, savedEnd, 'end');
-    let coords2 = getSpanCoordinates(element, '.end');
-    removeSpan(element);
-
-    let result = Math.abs(coords2.x - coords1.x) + 'px';
-    return result;
-}
-
-function setWidth(element) {
-    cursor.style.width = computeWidth(element);
-
-    if (savedEnd !== savedStart) {
-        cursor.classList.add('cursor-frame');
-    } else {
-        cursor.classList.remove('cursor-frame');
-        cursor.style.width = '';
-    }
-}
-
-function resetCaret() {
-    cursor.style = '';
-    cursor.setAttribute('class', 'cursor');
-    savedStart = savedEnd = inputField.selectionStart = inputField.value.length;
-}
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// Функционал последних введенных команд
-let lastEntered = new class LastEntered {
-    constructor() {
-        this.array = [];
-        this.position = -1;
-    }
-    
-    pushMax10() {
-        if (this.array.length < 10) {
-            this.array.push(typedText.textContent);
-        } else {
-            this.array.shift();
-            this.array.push(typedText.textContent);
-        }
-    }
-    get() {
-        let lastIndex = this.array.length - 1;
-        let currentIndex = lastIndex - this.position;
-        return this.array[currentIndex];
-    }
-
-    setPrevious() {
-        if (this.position < this.array.length - 1) this.position++
-    }
-    setNext() {
-        if (this.position > -1) this.position--
-    }
-    getSetPrevious() {
-        this.setPrevious();
-        return this.get();
-    }
-    getSetNext() { 
-        this.setNext();
-        return this.get();
-    }
-};
-
-// Вывод рандомной цитаты
-// Рандомное число в диапазоне - взято с MDN https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;       //Максимум не включается, минимум включается
-}
-
-let quotes = new class Quotes {
-    constructor() {
-        this.timer = '';
-        this.quotes = [
-            'Падение - это не провал. Провал это Провал. Падение - это где упал.',
-            'Не важно у кого день рождения. Важно у кого день рождения кого.',
-            'Лучше один раз упасть, чем сто раз упасть.',
-            'Каждый думает, что знает меня, но не каждый знает, что не знает, кто думает.',
-            'Как бы сейчас не было сейчас. Все будет было.',
-            'Не слушай тех, кто много обещает. Они обычно много обещают.',
-            'Волк слабее санитара, но в дурке он не работает.',
-            'Никогда не поздно, никогда не рано - поменять все поздно, если это рано.',
-        ];
-        this.quote = '';
-        this.i = 0;
-        this.done = false;
-    }
-
-    setRandomQuote() {
-        this.quote = this.quotes[getRandomInt(0, this.quotes.length)];
-        return this.quote
-    }
-    getLetter() {
-        return this.quote[this.i]
-    }
-    incrementI() {
-        this.i++;
-    }
-    reset() {
-        this.quote = '';
-        this.i = 0;
-        this.done = false;
-    }
-    letter() {
-        if (this.done) {
-            this.reset();
-        }
-        if (this.quote === '') {
-            this.setRandomQuote();
-        }
-
-        let result = this.getLetter();
-        this.incrementI();
-        if (this.getLetter() === undefined) {
-            this.done = true;
-        }
-        return result;
-    }
-    type() {
-        handlers.saveBlock();
-
-        setTimeout(()=>{this.typeLetter()}, 200);
-    }
-    typeLetter() {
-        inputField.value += this.letter();
-        triggerInputEvent();
-        this.timer = setTimeout(()=>{this.typeLetter()}, 50);
-        if (this.done) {
-            clearTimeout(this.timer);
-            handlers.unblock();
-        }
-    }
-};
-
-// Сохранение и блокирование обработчиков
-let handlers = new class Handlers{
-    constructor() {
-        this.listenerArray = [];
-    }
-    
-    save() {
-        this.listenerArray = [document.onkeydown, document.onmousedown, document.onmouseup, form.onsubmit];
-    }
-    block() {
-        document.onkeydown = null;
-        document.onmousedown = null;
-        document.onmouseup = null;
-        form.onsubmit = function(evt) {
-            evt.preventDefault()
-            return
-        };
-        inputField.setAttribute('readonly', '');
-    }
-    saveBlock() {
-        this.save();
-        this.block();
-    }
-    unblock() {
-        document.onkeydown = this.listenerArray[0];
-        document.onmousedown = this.listenerArray[1];
-        document.onmouseup = this.listenerArray[2];
-        form.onsubmit = this.listenerArray[3];
-        inputField.removeAttribute('readonly');
-    }
-};

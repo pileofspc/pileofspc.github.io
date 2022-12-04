@@ -179,3 +179,140 @@ function stopFlicker() {
 };
 
 // flicker();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function triggerInputEvent() {
+    inputField.dispatchEvent(
+        new Event('input', {bubbles:true})
+        );
+}
+
+function insertSpan(element, index, className) {
+    let span = document.createElement('span');
+    if (className) {
+        span.classList.add(className);
+    }
+    span.textContent = '\u2060';
+
+    let text = element.childNodes[0];
+    text.splitText(index).before(span);
+
+    return span;
+}
+
+function removeSpan(element) {
+    let collection = element.querySelectorAll('span');
+    for (let item of collection) {
+        item.remove();
+    }
+    element.normalize();
+}
+
+function getSpanCoordinates(element, className) {
+    let span = element.querySelector(className);
+    let rect = span.getBoundingClientRect();
+    return rect
+}
+
+function getPositionSorted(index) {
+    let start;
+    let end;
+
+    if (savedEnd >= savedStart) {
+        start = savedStart;
+        end = savedEnd;
+    } else {
+        start = savedEnd;
+        end = savedStart;
+    }
+
+    return [start, end][index];
+}
+
+function moveCaret(element) {
+    let coords;
+    let defaultCoords;
+
+    insertSpan(element, getPositionSorted(0), 'selection');
+    coords = getSpanCoordinates(element, '.selection');
+    removeSpan(element);
+
+    insertSpan(typedText, typedText.textContent.length, 'end');
+    defaultCoords = getSpanCoordinates(typedText, '.end');
+    removeSpan(typedText);
+    
+
+    // Пока не знаю, стоит ли оставить
+
+    // if (coords.y + 'px' !== cursor.style.top) {
+    //     cursor.classList.add('cursor-only-opacity');
+    // };
+
+    cursor.style.transform = `translateX(${coords.x - defaultCoords.x - 10.5}px)`;
+    cursor.style.top = coords.y + window.scrollY +'px';
+    if (savedStart === savedEnd && savedEnd === element.textContent.length) {
+        cursor.classList.remove('cursor-line');
+        cursor.style.transform = 'translateX(0)'
+    } else {
+        cursor.classList.add('cursor-line');
+    }
+
+    // ТУТ НУЖНО РАЗОБРАТЬСЯ, ТАЙМАУТ НЕ МОМЕНТАЛЬНЫЙ
+    setTimeout(() => {
+            cursor.classList.remove('cursor-only-opacity');
+    }, 10);
+}
+
+function computeWidth(element) {
+    insertSpan(element, savedStart, 'selection');
+    let coords1 = getSpanCoordinates(element, '.selection');
+    removeSpan(element);
+    insertSpan(element, savedEnd, 'end');
+    let coords2 = getSpanCoordinates(element, '.end');
+    removeSpan(element);
+
+    let result = Math.abs(coords2.x - coords1.x) + 'px';
+    return result;
+}
+
+function setWidth(element) {
+    cursor.style.width = computeWidth(element);
+
+    if (savedEnd !== savedStart) {
+        cursor.classList.add('cursor-frame');
+    } else {
+        cursor.classList.remove('cursor-frame');
+        cursor.style.width = '';
+    }
+}
+
+function resetCaret() {
+    cursor.style = '';
+    cursor.setAttribute('class', 'cursor');
+    savedStart = savedEnd = inputField.selectionStart = inputField.value.length;
+}
