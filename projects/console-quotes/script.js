@@ -344,12 +344,14 @@ document.onmouseup = function (evt) {
  }
 // Ивенты клавиатуры
 // Функционал Backspace, CTRL + Backspace, Enter, ArrowUp, доп. команды
+
 // БИНД ДЛЯ ТЕСТИРОВАНИЯ
-window.addEventListener('keydown', function(evt) {
-    if (evt.code == 'KeyP') {
-        console.log(handlers.listenerArray)
-    }
-});
+// window.addEventListener('keydown', function(evt) {
+//     if (evt.code == 'KeyP') {
+//         console.log(handlers.listenerArray)
+//     }
+// });
+
 document.onkeydown = function (evt) {
     if (evt.code == 'KeyC' && evt.ctrlKey) {
             return
