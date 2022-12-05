@@ -18,8 +18,6 @@ let inputField = document.querySelector('.input-field');
 // Добавляем обработчики и передаем фокус на элемент ввода
 inputField.focus();
 
-// let savedStart = 0;
-// let savedEnd = 0;
 
 // Контроль каретки
 
@@ -277,7 +275,7 @@ let handlers = new class Handlers{
     }
 };
 
-// Ивенты мыши
+// Обработчики кликов мыши
 document.onmousedown = function(evt) {
     if (!evt.shiftKey) {
         // Простой клик
@@ -342,7 +340,8 @@ document.onmouseup = function (evt) {
     done.classList.remove('no-select');
     document.body.classList.add('no-select');
  }
-// Ивенты клавиатуры
+
+// Обработчики нажатий на клавиши, ввода и отправки формы
 // Функционал Backspace, CTRL + Backspace, Enter, ArrowUp, доп. команды
 
 // БИНД ДЛЯ ТЕСТИРОВАНИЯ
@@ -417,7 +416,6 @@ inputField.oninput = function () {
         caret.move(typedText);
         caret.setWidth(typedText);
     }
-    
 };
 
 // setTimeout тут нужен для того, чтобы результат команды появлялся позже, чем сама команда в независимости от положения renderCommandResult в коде
@@ -459,12 +457,16 @@ form.onsubmit = function(evt) {
         let command = String(Function('return ' + typedText.textContent.slice(4))());
         renderCommandResult(command);
     }
-    //  если строка равна clear убираем все пишки
+    //  если строка равна clear убираем все пишки, кроме текущей, очищаем поле ввода, убираем линию раздела и сбрасываем каретку
     if (typedText.textContent === 'clear') {
-        let pTags = document.querySelectorAll('p');
+        let pTags = document.querySelectorAll('p:not(.typed-text)');
         for (let pTag of pTags) {
             pTag.remove()
         }
+        typedText.textContent = inputField.value = '';
+        typedText.classList.remove('add-line')
+        caret.reset();
+        return
     }
 
     // если набрали exit или quit - переходим на главную страницу
