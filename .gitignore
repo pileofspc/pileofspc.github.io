@@ -38,3 +38,6 @@ Thumbs.db
 
 ######################
 /secret-projects/
+
+.idea/
+.vscode/

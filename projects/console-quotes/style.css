@@ -45,8 +45,10 @@ p {
   display: inline;
   margin: 0;
 
-  white-space: pre-wrap;
   word-wrap: break-word;
+  white-space: break-spaces;
+
+  line-height: 65px;
 }
 
 .done {
@@ -107,17 +109,18 @@ p {
   margin-left: 5px;
   margin-top: 15px;
 
-  background-color: cyan;
-  filter: drop-shadow(0 0 4px cyan);
+  background-color: white;
+  filter: drop-shadow(0 0 4px white);
 
   transition: opacity 0.1s linear, width 0.05s linear, transform 0.05s linear, top 0.05s linear, background-color 0s 0.05s linear, outline 0.05s linear;
 
   box-sizing: border-box;
-  height: 40px;
 
   outline: 2px solid transparent;
 
   user-select: none;
+
+  animation: cursorFlicker 1s linear infinite;
 }
 
 .cursor-only-opacity {
@@ -126,16 +129,16 @@ p {
 
 .cursor-line {
   width: 3px;
-  height: 60px;
-  margin-top: 1px;
+  height: 55px;
+  margin-top: 5.5px;
 }
 
 .cursor-frame {
   background-color: transparent;
-  margin-top: 1px;
-  height: 60px;
+  margin-top: 5.5px;
+  height: 55px;
   
-  outline-color: cyan;
+  outline-color: white;
 
   transition: opacity 0.1s linear, width 0.05s linear, transform 0.05s linear, top 0.05s linear, outline 0.05s linear;
 }
@@ -180,4 +183,22 @@ input[type = "text"]:active {
 
 .no-select:not(body) {
   opacity: 0.7;
+}
+
+@keyframes cursorFlicker {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }

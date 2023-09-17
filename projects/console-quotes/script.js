@@ -25,6 +25,7 @@ let caret = new class Caret {
     constructor() {
         this.savedStart = 0;
         this.savedEnd = 0;
+        this.lineHeight = parseFloat(window.getComputedStyle(document.querySelector('p')).lineHeight);
     }
 
     insertSpan(element, index, className) {
@@ -100,18 +101,56 @@ let caret = new class Caret {
                 cursor.classList.remove('cursor-only-opacity');
         }, 10);
     }
-    computeWidth(element) {
-        this.insertSpan(element, this.savedStart, 'selection');
+    computeSelection(element) {
+        this.insertSpan(element, this.getPositionSorted(0), 'selection');
         let coords1 = this.getSpanCoordinates(element, '.selection');
         this.removeSpan(element);
-        this.insertSpan(element, this.savedEnd, 'end');
+        this.insertSpan(element, this.getPositionSorted(1), 'end');
         let coords2 = this.getSpanCoordinates(element, '.end');
         this.removeSpan(element);
-    
-        return Math.abs(coords2.x - coords1.x) + 'px';
+
+        let lines = (coords2.y - coords1.y) / this.lineHeight;
+        let oneLineWidth = Math.abs(coords2.x - coords1.x) + 'px';
+        let multiLineWidth = coords2.x + 'px';
+        return {
+            coords1: coords1,
+            coords2: coords2,
+            lines: lines,
+            oneLineWidth: oneLineWidth,
+            multiLineWidth: multiLineWidth
+        }
     }
-    setWidth(element) {
-        cursor.style.width = this.computeWidth(element);
+
+    expandSelection(element) {
+        this.removeAdditionalCursors();
+        let computed = this.computeSelection(element);
+
+        if (computed.lines === 0) {
+            cursor.style.width = computed.oneLineWidth;
+        }
+
+        if (computed.lines > 0) {
+            cursor.style.width = '110%';
+
+            this.createAdditionalCursors(computed.lines);
+            let cursors = this.getAdditionalCursors();
+            let currentAnimationTime = cursor.getAnimations()[0].currentTime;
+            let accumulatedY = computed.coords1.y + this.lineHeight;
+            for (let i = 0; i < cursors.length; i++) {
+                // sync animations
+                cursors[i].getAnimations()[0].startTime = currentAnimationTime;
+
+                cursors[i].style.left = '-10px';
+                cursors[i].style.top = accumulatedY + 'px';
+
+                accumulatedY += this.lineHeight;
+
+                cursors[i].style.width = '110%'
+                if (i === cursors.length - 1) {
+                    cursors[i].style.width = computed.multiLineWidth
+                }
+            }
+        }
     
         if (this.savedEnd !== this.savedStart) {
             cursor.classList.add('cursor-frame');
@@ -120,10 +159,29 @@ let caret = new class Caret {
             cursor.style.width = '';
         }
     }
+
     reset() {
         cursor.style = '';
         cursor.setAttribute('class', 'cursor');
         this.savedStart = this.savedEnd = inputField.selectionStart = inputField.value.length;
+    }
+
+    createAdditionalCursors(number) {
+        for (let i = 0; i < number; i++) {
+            let span = document.createElement('span');
+            span.classList.add('cursor', 'cursor-frame', 'additional-cursor');
+            span.style.width = '200px';
+            cursor.after(span);
+        }
+    }
+    getAdditionalCursors() {
+        return document.querySelectorAll('.additional-cursor');
+    }
+    removeAdditionalCursors() {
+        let additionalCursors = this.getAdditionalCursors();
+        for (let cursor of additionalCursors) {
+            cursor.remove();
+        }
     }
 }
 
@@ -331,7 +389,7 @@ document.onmouseup = function (evt) {
     
             if (typedText.textContent) {
                 caret.move(typedText);
-                caret.setWidth(typedText);
+                caret.expandSelection(typedText);
             }
         }
     }
@@ -414,7 +472,7 @@ inputField.oninput = function () {
     caret.savedEnd = inputField.selectionEnd;
     if (typedText.textContent) {
         caret.move(typedText);
-        caret.setWidth(typedText);
+        caret.expandSelection(typedText);
     }
 };
 
@@ -535,4 +593,4 @@ let animation = new class Animation {
         cursor.style.opacity = '100%';
     };
 }
-animation.start();
+// animation.start();
